@@ -8,7 +8,7 @@ export default function Navbar() {
       <div className={styles.links}>
         <a href="#">Inicio</a>
         <a href="#">WhitePaper</a>
-        <a href="#">Entrar con MetaMask</a>
+        <a href="#" className={styles.loginMetaMask}>Entrar con MetaMask</a>
       </div>
     </nav>
   )
