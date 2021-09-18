@@ -1,5 +1,6 @@
 import styles from './styles/Inicio.module.css'
 
+
 export default function Inicio() {
 
   return (
