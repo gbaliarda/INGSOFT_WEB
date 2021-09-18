@@ -1,30 +1,20 @@
 import styles from './styles/Navbar.module.css'
-import { ethers } from "ethers";
-// import { useMoralis } from "react-moralis";
-import abi from "./data/abi.json";
+import { Button } from "@chakra-ui/react"
+import { useMoralis } from "react-moralis";
+import SignUp from "./Signup";
+import { useState } from "react";
+import Login from "./Login";
+
 const cryvTokenAddress = "0xd1aF9c4f9ba37D0c889353515898B479022355f5";
 
-
 export default function Navbar() {
-  // const {authenticate} = useMoralis();
+  const { isAuthenticated, isAuthenticating, authError, logout, user } = useMoralis();
+  const [ signupPopup, setSignupPopup ] = useState(false);
+  const [ loginPopup, setLoginPopup ] = useState(false);
 
-  async function requestAccount() {
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
-  }
-
-  async function getTotalSupply() {
-    if (typeof window.ethereum !== 'undefined') {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const address = await signer.getAddress();
-      const contract = new ethers.Contract(cryvTokenAddress, abi.abi, provider)
-      try {
-        const data = await contract.balanceOf(address);
-        console.log('Total Supply: ', (data / 10**18).toString())
-      } catch (err) {
-        console.log(err)
-      }
-    }    
+  if (isAuthenticated && (signupPopup || loginPopup) ) {
+    setSignupPopup(false);
+    setLoginPopup(false);
   }
 
   return (
@@ -33,10 +23,20 @@ export default function Navbar() {
       <div className={styles.links}>
         <a href="#">Inicio</a>
         <a href="#">WhitePaper</a>
-        
-        <button onClick={requestAccount} className={styles.loginMetaMask}>Entrar con MetaMask</button>
-        <button onClick={getTotalSupply}>Get Total Supply</button>
+        { isAuthenticated ? 
+        <div>
+          <p>{user.attributes.accounts}</p>
+          <Button onClick={() => logout()} className={styles.loginMetaMask}>Desconectarse</Button> 
+        </div> :
+        <div className={styles.AuthenticationBtn}>
+          <Button onClick={() => setLoginPopup(true)}>Iniciar Sesion</Button>
+          <Button onClick={() => setSignupPopup(true)}>Registrarse</Button>
+        </div>
+        }
       </div>
+
+      <SignUp trigger={signupPopup} setTrigger={setSignupPopup}/>
+      <Login trigger={loginPopup} setTrigger={setLoginPopup}/>
     </nav>
   )
 
