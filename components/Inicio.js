@@ -9,8 +9,8 @@ export default function Inicio() {
         <h1>CryptoViper</h1>
         <h2>Consigue $CRYV en PancakeSwap <a href="https://www.google.com" target="_blank" rel="noopener noreferrer">aqui!</a></h2>
         <div className={styles.buttons}>
-          <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" className={styles.btn}>PvP</a>
-          <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" className={styles.btn}>PvE</a>
+          <a href="game" className={styles.btn}>PvP</a>
+          <a href="game" className={styles.btn}>PvE</a>
         </div>
       </div>
       <div className={styles.rightSec}>

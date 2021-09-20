@@ -19,24 +19,27 @@ export default function Navbar() {
 
   return (
     <nav className={styles.nav}>
-      <a href="#">CryptoViper</a>
-      <div className={styles.links}>
-        <a href="#">Inicio</a>
-        <a href="#">WhitePaper</a>
-        { isAuthenticated ? 
-        <div>
-          <p>{user.attributes.accounts}</p>
-          <Button onClick={() => logout()} className={styles.loginMetaMask}>Desconectarse</Button> 
-        </div> :
-        <div className={styles.AuthenticationBtn}>
-          <Button onClick={() => setLoginPopup(true)}>Iniciar Sesion</Button>
-          <Button onClick={() => setSignupPopup(true)}>Registrarse</Button>
+      <div className={styles.navContainer}>
+        <a href="#">CryptoViper</a>
+        <div className={styles.links}>
+          <a href="index">Inicio</a>
+          <a href="#">WhitePaper</a>
+          { isAuthenticated ? 
+          <div>
+            <p>{user.attributes.accounts}</p>
+            <Button onClick={() => logout()} className={styles.loginMetaMask}>Desconectarse</Button> 
+          </div> :
+          <Button isLoading={isAuthenticating} onClick={() => authenticate()} className={styles.loginMetaMask}>Entrar con MetaMask</Button>
+          //<div className={styles.AuthenticationBtn}>
+          //  <Button onClick={() => setLoginPopup(true)}>Iniciar Sesion</Button>
+          //  <Button onClick={() => setSignupPopup(true)}>Registrarse</Button>
+          //</div>
+          }
         </div>
-        }
-      </div>
 
-      <SignUp trigger={signupPopup} setTrigger={setSignupPopup}/>
-      <Login trigger={loginPopup} setTrigger={setLoginPopup}/>
+        <SignUp trigger={signupPopup} setTrigger={setSignupPopup}/>
+        <Login trigger={loginPopup} setTrigger={setLoginPopup}/>
+      </div>
     </nav>
   )
 
