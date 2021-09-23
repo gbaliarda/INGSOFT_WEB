@@ -1,0 +1,35 @@
+.nav {
+  width: 90%;
+  margin: auto;
+  padding: 1.1em 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 400;
+
+  a {
+    color: #fff;
+    font-size: 1.1em;
+    font-weight: 400;
+  }
+
+  span {
+    color: #d0db4e;
+  }
+
+  .links {
+    * {
+      margin-left: 45px;
+    }
+  
+    button {
+      padding: .8em;
+      border-radius: 10px;
+      border: none;
+      background: #1e6f5c;
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+    }
+  }
+}

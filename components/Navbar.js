@@ -1,42 +1,24 @@
-import styles from './styles/Navbar.module.css'
-import { Button } from "@chakra-ui/react"
+import styles from './styles/Navbar.module.scss'
 import { useMoralis } from "react-moralis";
-import SignUp from "./Signup";
-import { useState } from "react";
-import Login from "./Login";
+import Link from 'next/link';
 
 const cryvTokenAddress = "0xd1aF9c4f9ba37D0c889353515898B479022355f5";
 
 export default function Navbar() {
-  const { isAuthenticated, isAuthenticating, authError, logout, user } = useMoralis();
-  const [ signupPopup, setSignupPopup ] = useState(false);
-  const [ loginPopup, setLoginPopup ] = useState(false);
-
-  if (isAuthenticated && (signupPopup || loginPopup) ) {
-    setSignupPopup(false);
-    setLoginPopup(false);
-  }
+  const { isAuthenticated, authenticate, isAuthenticating, authError, logout, user } = useMoralis();
 
   return (
     <nav className={styles.nav}>
       <a href="#">CryptoViper</a>
       <div className={styles.links}>
-        <a href="#">Inicio</a>
-        <a href="#">WhitePaper</a>
-        { isAuthenticated ? 
-        <div>
-          <p>{user.attributes.accounts}</p>
-          <Button onClick={() => logout()} className={styles.loginMetaMask}>Desconectarse</Button> 
-        </div> :
-        <div className={styles.AuthenticationBtn}>
-          <Button onClick={() => setLoginPopup(true)}>Iniciar Sesion</Button>
-          <Button onClick={() => setSignupPopup(true)}>Registrarse</Button>
-        </div>
+        <Link href="/">Inicio</Link>
+        <Link href="/">WhitePaper</Link>
+        { isAuthenticated && 
+          <span>{`${user.attributes.accounts[0].substring(0,5)}...${user.attributes.accounts[0].slice(-4)}`}</span> 
         }
+        { isAuthenticated && <button onClick={logout} >Desconectarse</button> }
+        { !isAuthenticated && <button onClick={authenticate}>Iniciar Sesión</button>}
       </div>
-
-      <SignUp trigger={signupPopup} setTrigger={setSignupPopup}/>
-      <Login trigger={loginPopup} setTrigger={setLoginPopup}/>
     </nav>
   )
 
