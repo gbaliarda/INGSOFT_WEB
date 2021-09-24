@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import styles from './styles/Pve.module.css'
+import styles from './styles/PveGameplay.module.scss'
 import Snake from './gameComponents/Snake'
 import Food from './gameComponents/Food'
 
@@ -21,7 +21,7 @@ const initialState = {
   ]
 }
 
-class Pve extends Component {
+class PveGameplay extends Component {
 
   state = initialState;
 
@@ -40,16 +40,20 @@ class Pve extends Component {
     e = e || window.event;
     switch(e.keyCode) {
       case 38:
-        this.setState({direction: 'UP'});
+        if(this.state.direction != 'DOWN')
+          this.setState({direction: 'UP'});
         break;
       case 40:
-        this.setState({direction: 'DOWN'});
+        if(this.state.direction != 'UP')
+          this.setState({direction: 'DOWN'});
         break;
       case 37:
-        this.setState({direction: 'LEFT'});
+        if(this.state.direction != 'RIGHT')
+          this.setState({direction: 'LEFT'});
         break;
       case 39:
-        this.setState({direction: 'RIGHT'});
+        if(this.state.direction != 'LEFT')
+          this.setState({direction: 'RIGHT'});
         break;
     }
   }
@@ -142,4 +146,4 @@ class Pve extends Component {
   }
 }
 
-export default Pve;
+export default PveGameplay;

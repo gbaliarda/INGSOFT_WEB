@@ -1,23 +1,16 @@
-// Styles
-import styles from '../styles/Home.module.css'
-// Components
-import Navbar from '../components/Navbar'
-import Inicio from '../components/Inicio'
-
+// Libraries
 import React from "react";
-import ReactDOM from "react-dom";
-import { MoralisProvider } from "react-moralis";
-
-const appId = "DZETAcxjlLHc4J46gOPZYmqlMWmUQR1fQl59OLkd";
-const serverUrl = "https://2bxi0dkc5yna.grandmoralis.com:2053/server";
+// Styles
+import styles from '../styles/Home.module.scss'
+// Components
+import NavWrapper from '../components/NavWrapper'
+import Landing from '../components/Landing'
 
 export default function Home() {
   return (
     <div className={styles.container}>
-      <MoralisProvider appId={appId} serverUrl={serverUrl}>
-        <Navbar />
-      </MoralisProvider>
-      <Inicio />
+      <NavWrapper />
+      <Landing />
     </div>
   )
 }

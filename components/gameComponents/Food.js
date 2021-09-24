@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../styles/Pve.module.css'
+import styles from '../styles/PveGameplay.module.scss'
 
 const Food = (props) => {
 
