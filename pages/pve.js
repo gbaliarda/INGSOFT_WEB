@@ -1,16 +1,22 @@
 // Styles
 import styles from '../styles/Pve.module.scss'
 // Components
-import NavWrapper from '../components/NavWrapper'
-import Pve from '../components/PveGameplay'
+import { MoralisProvider } from "react-moralis";
+import Pve from '../components/PveGameplayV2'
+import Navbar from '../components/Navbar'
 
 import React from "react";
+const appId = "DZETAcxjlLHc4J46gOPZYmqlMWmUQR1fQl59OLkd";
+const serverUrl = "https://2bxi0dkc5yna.grandmoralis.com:2053/server";
 
 export default function pve() {
+  
   return (
     <div className={styles.container}>
-      <NavWrapper />
-      <Pve />
+      <MoralisProvider appId={appId} serverUrl={serverUrl}>
+        <Navbar />
+        <Pve />
+      </MoralisProvider>
     </div>
   )
 }

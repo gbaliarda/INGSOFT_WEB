@@ -13,13 +13,17 @@
     font-weight: 400;
   }
 
-  span {
-    color: #d0db4e;
-  }
+
+
 
   .links {
     * {
       margin-left: 45px;
+    }
+
+    .userInfo {
+      display: inline;
+      margin: 0;
     }
   
     button {
@@ -31,5 +35,27 @@
       font-size: 1em;
       cursor: pointer;
     }
+
+    .address {
+      color: #d0db4e;
+      margin-left: 25px;
+    }
+
+    .energyBox {
+      display: inline;
+      margin-left: 0;
+  
+      .energyText {
+        color: #fff;
+        font-size: 1.1em;
+      }
+    
+      .energyIcon {
+        width: 30px;
+        margin-left: 0;
+        vertical-align: middle;
+      }
+    }
+  
   }
 }

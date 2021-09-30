@@ -12,7 +12,7 @@ const getRandomCoordinates = () => {
 }
 
 const initialState = {
-  active: false,
+  status: 'inactive',
   score: 0,
   food: getRandomCoordinates(),
   speed: 100,
@@ -25,7 +25,7 @@ const initialState = {
 
 class PveGameplay extends Component {
 
-  state = initialState;
+  state = { ...initialState };
 
   componentDidMount() {
     setInterval(this.moveSnake, this.state.speed);
@@ -39,7 +39,7 @@ class PveGameplay extends Component {
   }
 
   onKeyDown = (e) => {
-    if(!this.state.active)
+    if(this.state.status !== 'active')
       return;
 
     e = e || window.event;
@@ -64,7 +64,7 @@ class PveGameplay extends Component {
   }
 
   moveSnake = () => {
-    if(!this.state.active)
+    if(this.state.status !== 'active')
       return;
 
     let dots = [...this.state.snakeDots];
@@ -72,10 +72,10 @@ class PveGameplay extends Component {
 
     switch (this.state.direction) {
       case 'RIGHT':
-        head = [head[0] + 2, head[1]];
+        head = [head[0] + 1, head[1]];
         break;
       case 'LEFT':
-        head = [head[0] - 2, head[1]];
+        head = [head[0] - 1, head[1]];
         break;
       case 'DOWN':
         head = [head[0], head[1] + 2];
@@ -157,9 +157,12 @@ class PveGameplay extends Component {
   }
 
   onGameOver() {
-    alert('Game Over');
-    this.setState(initialState);
-    this.state.active = false;
+    let oldScore = this.state.score;
+    this.setState({
+      ...initialState,
+      status: 'gameover',
+      score: oldScore
+    });
   }
 
   render() {
@@ -171,23 +174,22 @@ class PveGameplay extends Component {
           </h2>
         </div>
         <div className={styles.gameArea}>
-          { this.state.active ? (  
+          { this.state.status === 'active' && (  
             <div>
               <Snake snakeDots={this.state.snakeDots}></Snake>
               <Food dot={this.state.food}></Food>
             </div>
-          ) : (
-            <button className={styles.startGame} onClick={() => this.state.active=true}>Comenzar Juego</button>
+          )}
+          { this.state.status === 'gameover' && (
+            <h2 className={styles.showScore}>Perdiste! Tu puntuacion fue de: {this.state.score}</h2>
+          )}
+          { this.state.status !== 'active' && (
+            <button className={styles.startGame} onClick={() => {this.state.status='active'; this.state.score=0}}>Comenzar Juego</button>
           )}
         </div>
       </div>
     )
   }
 }
-
-/*
-          <Snake snakeDots={this.state.snakeDots}></Snake>
-          <Food dot={this.state.food}></Food>
-*/
 
 export default PveGameplay;
