@@ -12,12 +12,14 @@ const getRandomCoordinates = () => {
 }
 
 const initialState = {
+  active: false,
+  score: 0,
   food: getRandomCoordinates(),
   speed: 100,
   direction: 'RIGHT',
   snakeDots: [
-    [0,0],
-    [2,0]
+    [44,44],
+    [46,44]
   ]
 }
 
@@ -37,6 +39,9 @@ class PveGameplay extends Component {
   }
 
   onKeyDown = (e) => {
+    if(!this.state.active)
+      return;
+
     e = e || window.event;
     switch(e.keyCode) {
       case 38:
@@ -59,9 +64,12 @@ class PveGameplay extends Component {
   }
 
   moveSnake = () => {
+    if(!this.state.active)
+      return;
+
     let dots = [...this.state.snakeDots];
     let head = dots[dots.length - 1];
-    
+
     switch (this.state.direction) {
       case 'RIGHT':
         head = [head[0] + 2, head[1]];
@@ -105,12 +113,31 @@ class PveGameplay extends Component {
     let head = this.state.snakeDots[this.state.snakeDots.length - 1];
     let food = this.state.food;
     if (head[0] == food[0] && head[1] == food[1]) {
-      this.setState({
-        food: getRandomCoordinates()
+    let coordsEmpty = true;
+    let coords;
+    let snake = [...this.state.snakeDots];
+    while (coordsEmpty) {
+      coordsEmpty = false;
+      coords = getRandomCoordinates();
+      snake.forEach(dot => {
+        if (coords[0] == dot[0] && coords[1] == dot[1]) {
+          coordsEmpty = true;
+        }
       })
+    }
+    
+    snake.forEach
+      this.setState({
+        food: coords
+      })
+      this.addScore();
       this.enlargeSnake();
       this.increaseSpeed();
     }
+  }
+
+  addScore() {
+    this.state.score += 100;
   }
 
   enlargeSnake() {
@@ -132,18 +159,35 @@ class PveGameplay extends Component {
   onGameOver() {
     alert('Game Over');
     this.setState(initialState);
+    this.state.active = false;
   }
 
   render() {
     return (
       <div className={styles.container}>
+        <div className={styles.scoreBox}>
+          <h2 className={styles.scorePoints}>Puntaje: 
+            <p className={styles.scoreNumber}> {this.state.score}</p>
+          </h2>
+        </div>
         <div className={styles.gameArea}>
-          <Snake snakeDots={this.state.snakeDots}></Snake>
-          <Food dot={this.state.food}></Food>
+          { this.state.active ? (  
+            <div>
+              <Snake snakeDots={this.state.snakeDots}></Snake>
+              <Food dot={this.state.food}></Food>
+            </div>
+          ) : (
+            <button className={styles.startGame} onClick={() => this.state.active=true}>Comenzar Juego</button>
+          )}
         </div>
       </div>
     )
   }
 }
+
+/*
+          <Snake snakeDots={this.state.snakeDots}></Snake>
+          <Food dot={this.state.food}></Food>
+*/
 
 export default PveGameplay;
