@@ -2,7 +2,8 @@ import styles from './styles/Account.module.scss'
 import { useMoralis } from "react-moralis";
 import Moralis from 'moralis';
 import React, { useState, useMemo, useEffect } from "react";
-import { useTab } from '@chakra-ui/tabs';
+import Spinner from './Spinner';
+import StatusMessage from './StatusMessage';
 
 const cryvTokenAddress = "0xd1af9c4f9ba37d0c889353515898b479022355f5";
 
@@ -11,6 +12,9 @@ export default function Account() {
   const [cryvBalance, setCryvBalance] = useState(0);
   const [ceBalance, setCeBalance] = useState(0);
   const [bnbBalance, setBnbBalance] = useState(0);
+  const [loadingSpinner, setLoadingSpinner ] = useState(false);
+  const [status, setStatus] = useState({});
+  const [statusIsOpen, setStatusIsOpen] = useState(false);
 
   const { isAuthenticated, user } = useMoralis();
 
@@ -81,7 +85,7 @@ export default function Account() {
   }
 
   async function confirmExchange() {
-
+    setLoadingSpinner(true);
     const ceToExchange = document.getElementById("exchangeInputCE").value;
     const cryvToExchange = document.getElementById("exchangeInputCRYV").value;
     const data = {
@@ -99,12 +103,19 @@ export default function Account() {
       });
       const d = await result.json();
       console.log(d);
+      if(result.status != 200)
+        throw new Error(d.message);
       user.set("ceAmount", parseInt(user.attributes.ceAmount-ceToExchange));
       await user.save();
+      setStatus({ message: `${ceToExchange}CE intercambiados con exito por ${cryvToExchange}CRYV`, error: false})
+      toggleExchangePopup();
     } catch (e) {
       console.log(e);
+      setStatus({ message: 'Error al intercambiar CE por CRYV: '+e.message, error: true});
     }
-    toggleExchangePopup();
+    setStatusIsOpen(true);
+    setTimeout(() => setStatusIsOpen(false),5000);
+    setLoadingSpinner(false);
   }
 
   async function testing() {
@@ -118,8 +129,6 @@ export default function Account() {
     getCryptoViperToken();
     getCeToken();
     getBnbToken();
-
-
   });
 
   return (
@@ -164,10 +173,16 @@ export default function Account() {
             <img src="icons8-arrow-48.png" />
             <input type="number" placeholder="Cantidad de CRYV" className={styles.inputCRYV} onChange={changeCE} id="exchangeInputCRYV" autoComplete='off' />
           </div>
-          <button className={styles.confirmBtn} onClick={confirmExchange}>Aceptar</button>
+          {!loadingSpinner? (
+            <button className={styles.confirmBtn} onClick={confirmExchange}>Aceptar</button>
+            ):(
+            <div className={styles.spinBtn}><Spinner /></div>
+          )}
         </div>
       </div>
       )}
+
+      <StatusMessage status={status} isOpen={statusIsOpen} setIsOpen={setStatusIsOpen} />
     </div>
   )
 

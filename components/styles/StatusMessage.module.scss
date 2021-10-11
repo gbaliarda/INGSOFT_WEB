@@ -1,0 +1,19 @@
+.successMessage, .errorMessage {
+  position: absolute;
+  width: 300px;
+  color: white;
+  border-radius: 10px;
+  right: 20px;
+  top: 20px;
+  padding: .6em .7em;
+  text-align: center;
+  cursor: pointer;
+}
+
+.successMessage {
+  background-color: #4bb543;
+}
+
+.errorMessage {
+  background-color: #cc0000;
+}

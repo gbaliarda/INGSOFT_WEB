@@ -2,7 +2,7 @@
 import styles from '../styles/Pve.module.scss'
 // Components
 import { MoralisProvider } from "react-moralis";
-import Pve from '../components/PveGameplayV2'
+import Pve from '../components/PveGameplay'
 import Navbar from '../components/Navbar'
 
 import React from "react";

@@ -1,195 +1,143 @@
-import React, {Component} from 'react';
+import React, { useState, useRef, useEffect } from "react";
+import { useInterval } from './gameComponents/useInterval';
+import { useMoralis } from "react-moralis";
 import styles from './styles/PveGameplay.module.scss'
-import Snake from './gameComponents/Snake'
-import Food from './gameComponents/Food'
+import {
+  CANVAS_SIZE,
+  SNAKE_START,
+  APPLE_START,
+  SCALE,
+  SPEED,
+  DIRECTIONS 
+} from './gameComponents/constant';
 
-const getRandomCoordinates = () => {
-  let min = 1;
-  let max = 90;
-  let x = Math.floor((Math.random()*(max-min+1)+min)/2)*2;
-  let y = Math.floor((Math.random()*(max-min+1)+min)/2)*2;
-  return [x,y];
+function getRandomCoordinates() {
+  let x = Math.floor(Math.random() * CANVAS_SIZE[0] / SCALE);
+  let y = Math.floor(Math.random() * CANVAS_SIZE[1] / SCALE);
+  return [x,y]
 }
 
-const initialState = {
-  status: 'inactive',
-  score: 0,
-  food: getRandomCoordinates(),
-  speed: 100,
-  direction: 'RIGHT',
-  snakeDots: [
-    [44,44],
-    [46,44]
-  ]
-}
+const PveGameplay = () => {
+  const canvasRef = useRef();
+  const [snake, setSnake] = useState(SNAKE_START);
+  const [apple, setApple] = useState(APPLE_START);
+  const [dir, setDir] = useState([0, -1]);
+  const [speed, setSpeed] = useState(null);
+  const [gameOver, setGameover] = useState(false);
+  const [score, setScore] = useState(0);
+  const { isAuthenticated, authenticate, isAuthenticating, authError, logout, user } = useMoralis();
 
-class PveGameplay extends Component {
-
-  state = { ...initialState };
-
-  componentDidMount() {
-    setInterval(this.moveSnake, this.state.speed);
-    document.onkeydown = this.onKeyDown;
-  }
-
-  componentDidUpdate() {
-    this.checkIfOutOfBorders();
-    this.checkIfCollapsed();
-    this.checkIfEat();
-  }
-
-  onKeyDown = (e) => {
-    if(this.state.status !== 'active')
+  const startGame = () => {
+    if(user.attributes.energy == 0) {
       return;
-
-    e = e || window.event;
-    switch(e.keyCode) {
-      case 38:
-        if(this.state.direction != 'DOWN')
-          this.setState({direction: 'UP'});
-        break;
-      case 40:
-        if(this.state.direction != 'UP')
-          this.setState({direction: 'DOWN'});
-        break;
-      case 37:
-        if(this.state.direction != 'RIGHT')
-          this.setState({direction: 'LEFT'});
-        break;
-      case 39:
-        if(this.state.direction != 'LEFT')
-          this.setState({direction: 'RIGHT'});
-        break;
     }
+
+    let canvas = document.getElementById("canvasPvE");
+    canvas.style.display = 'block';
+
+
+    setScore(0);
+    setSnake(SNAKE_START);
+    setApple(getRandomCoordinates);
+    setDir([0, -1]);
+    setSpeed(SPEED);
+    setGameover(false);
+    document.getElementById("canvasPveContainer").focus();
   }
 
-  moveSnake = () => {
-    if(this.state.status !== 'active')
+  const endGame = async () => {
+    setSpeed(null);
+    setGameover(true);
+    let canvas = document.getElementById("canvasPvE");
+    canvas.style.display = 'none';
+    let scoreText = document.getElementById("scorepve");
+    scoreText.textContent = score;
+    user.set("energy", user.attributes.energy-1);
+    user.set("ceAmount", user.attributes.ceAmount+score/100);
+    document.getElementById("winCEAmount").textContent = score/100;
+    await user.save();
+  }
+
+  const moveSnake = ({keyCode}) => {
+    if(!(keyCode in DIRECTIONS))
       return;
-
-    let dots = [...this.state.snakeDots];
-    let head = dots[dots.length - 1];
-
-    switch (this.state.direction) {
-      case 'RIGHT':
-        head = [head[0] + 1, head[1]];
-        break;
-      case 'LEFT':
-        head = [head[0] - 1, head[1]];
-        break;
-      case 'DOWN':
-        head = [head[0], head[1] + 2];
-        break;
-      case 'UP':
-        head = [head[0], head[1] - 2];
-        break;
-    }
-    dots.push(head);
-    dots.shift();
-    this.setState({
-      snakeDots: dots
-    })
-  }
-
-  checkIfOutOfBorders() {
-    let head = this.state.snakeDots[this.state.snakeDots.length - 1];
-    if (head[0] >= 100 || head[1] >= 100 || head[0] < 0 || head[1] < 0) {
-      this.onGameOver();
-    }
-  }
-
-  checkIfCollapsed() {
-    let snake = [...this.state.snakeDots];
-    let head = snake[snake.length - 1];
-    snake.pop();
-    snake.forEach(dot => {
-      if (head[0] == dot[0] && head[1] == dot[1]) {
-        this.onGameOver();
-      }
-    })
-  }
-
-  checkIfEat() {
-    let head = this.state.snakeDots[this.state.snakeDots.length - 1];
-    let food = this.state.food;
-    if (head[0] == food[0] && head[1] == food[1]) {
-    let coordsEmpty = true;
-    let coords;
-    let snake = [...this.state.snakeDots];
-    while (coordsEmpty) {
-      coordsEmpty = false;
-      coords = getRandomCoordinates();
-      snake.forEach(dot => {
-        if (coords[0] == dot[0] && coords[1] == dot[1]) {
-          coordsEmpty = true;
-        }
-      })
-    }
+    console.log(`dir ${dir} y keycode ${keyCode}`);
     
-    snake.forEach
-      this.setState({
-        food: coords
-      })
-      this.addScore();
-      this.enlargeSnake();
-      this.increaseSpeed();
+    if(dir === DIRECTIONS[39] && keyCode === 37 || dir === DIRECTIONS[68] && keyCode === 65)
+      return;
+    if(dir === DIRECTIONS[37] && keyCode === 39 || dir === DIRECTIONS[65] && keyCode === 68)
+      return;
+
+    if(dir === DIRECTIONS[38] && keyCode === 40 || dir === DIRECTIONS[87] && keyCode === 83)
+      return;
+    if(dir === DIRECTIONS[40] && keyCode === 38 || dir === DIRECTIONS[83] && keyCode === 87)
+      return;
+
+    setDir(DIRECTIONS[keyCode]);
+  }
+
+  const createApple = () => apple.map((_, i) => Math.floor(Math.random() * CANVAS_SIZE[i] / SCALE));
+
+  const checkCollision = (piece, snk = snake) => {
+    if ( piece[0] * SCALE >= CANVAS_SIZE[0] || piece[0] < 0 || piece[1] * SCALE >= CANVAS_SIZE[1] || piece[1] < 0)
+      return true;
+
+    for (const segment of snk)
+      if (piece[0] === segment[0] && piece[1] === segment[1] )
+        return true;
+    return false;
+  }
+
+  const checkAppleCollision = newSnake => {
+    if (newSnake[0][0] === apple[0] && newSnake[0][1] === apple[1]) {
+      let newApple = createApple();
+      while (checkCollision(newApple, newSnake)) {
+        newApple = createApple();
+      }
+      setApple(newApple);
+      setScore(score+100);
+      return true;
     }
+    return false;
+  }
+  
+  const gameLoop = () => {
+    const snakeCopy = JSON.parse(JSON.stringify(snake));
+    const newSnakeHead = [snakeCopy[0][0]+ dir[0], snakeCopy[0][1] + dir[1]];
+    snakeCopy.unshift(newSnakeHead);
+    if(checkCollision(newSnakeHead))
+      endGame();
+    if(!checkAppleCollision(snakeCopy))
+      snakeCopy.pop();
+    setSnake(snakeCopy);
   }
 
-  addScore() {
-    this.state.score += 100;
-  }
+  useEffect(() => {
+    const context = canvasRef.current.getContext("2d");
+    context.setTransform(SCALE, 0, 0, SCALE, 0, 0);
+    context.clearRect(0, 0, CANVAS_SIZE[0], CANVAS_SIZE[1]);
+    context.fillStyle = "#000";
+    snake.forEach(([x,y]) => context.fillRect(x, y, 1 ,1));
+    context.fillStyle = "red";
+    context.fillRect(apple[0], apple[1], 1, 1);
+  }, [snake, apple, gameOver]);
 
-  enlargeSnake() {
-    let newSnake = [...this.state.snakeDots];
-    newSnake.unshift([])
-    this.setState({
-      snakeDots: newSnake
-    })
-  }
+  useInterval(() => gameLoop(), speed);
 
-  increaseSpeed() {
-    if (this.state.speed > 10) {
-      this.setState({
-        speed: this.state.speed - 10
-      })
-    }
-  }
-
-  onGameOver() {
-    let oldScore = this.state.score;
-    this.setState({
-      ...initialState,
-      status: 'gameover',
-      score: oldScore
-    });
-  }
-
-  render() {
-    return (
+  return (
       <div className={styles.container}>
-        <div className={styles.scoreBox}>
-          <h2 className={styles.scorePoints}>Puntaje: 
-            <p className={styles.scoreNumber}> {this.state.score}</p>
-          </h2>
-        </div>
-        <div className={styles.gameArea}>
-          { this.state.status === 'active' && (  
-            <div>
-              <Snake snakeDots={this.state.snakeDots}></Snake>
-              <Food dot={this.state.food}></Food>
-            </div>
-          )}
-          { this.state.status === 'gameover' && (
-            <h2 className={styles.showScore}>Perdiste! Tu puntuacion fue de: {this.state.score}</h2>
-          )}
-          { this.state.status !== 'active' && (
-            <button className={styles.startGame} onClick={() => {this.state.status='active'; this.state.score=0}}>Comenzar Juego</button>
-          )}
+        <h2 className={styles.showScore}>Tu puntuacion: {`${score}`}</h2>
+        <div className={styles.gameArea} style={{width: `${CANVAS_SIZE[0]}px`, height: `${CANVAS_SIZE[1]}px`}}>
+            {gameOver && <div className={styles.gameOverScreen}>Perdiste! <br/> Tu puntuacion: <p className={styles.score} id="scorepve"></p> <br/> Ganaste <p className={styles.score} id="winCEAmount">0</p> CE</div>}
+            {isAuthenticated && user.attributes.energy === 0 && <p className={styles.noEnergy}>No tienes energía suficiente para jugar!</p>}
+            {isAuthenticated && speed == null && <button onClick={startGame} className={styles.startGameBtn}>Start Game</button>}
+            {!isAuthenticated && <button onClick={authenticate} className={styles.loginBtn}>Iniciar Sesión</button>}
+          <div role="button" tabIndex="0" onKeyDown={e => moveSnake(e)} id="canvasPveContainer"> 
+            <canvas className={styles.canvasStyle} ref={canvasRef} id="canvasPvE" width={`${CANVAS_SIZE[0]}px`} height={`${CANVAS_SIZE[1]}px`} style={{display:"none"}}/>
+          </div>
         </div>
       </div>
-    )
-  }
+  );
 }
 
 export default PveGameplay;

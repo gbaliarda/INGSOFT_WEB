@@ -1,62 +1,53 @@
-.gameArea {
-  position: relative;
-  margin: 50px auto;
-  margin-top: 10px;
-  width: 1200px;
-  height: 600px;
-  border: 10px solid darkgrey;
-  background-color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-
-  .startGame {
-    text-decoration: none;
-    background: white;
-    border: 1px solid black;
-    border-radius: 5px;
-    font-size: 20px;
-    padding: .5rem;
-  }
-
-  .startGame:hover {
-    cursor: pointer;
-    background-color: #bbbbbb;
-  }
-}
-
-.snakeDot {
-  position: absolute;
-  width: 1%;
-  height: 2%;
-  background-color: #000;
-  border: 1px solid #000;
-}
-
-.snakeFood {
-  position: absolute;
-  width: 1%;
-  height: 2%;
-  background: reD;
-  border: 1px solid #fff;
-  border-radius: 50%;
-  z-index: 1;
-}
-
 .container {
+  text-align: center;
 
-  .scoreBox {
+  .showScore {
+    color:white;
+    font-size: 26px;
+    font-weight: 400;
+    margin-top: 0;
+  }
+
+  .gameArea {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    margin: auto;
+    align-items: center;
     justify-content: center;
+    background-color: white;
 
-    .scorePoints, .scoreNumber{
+    
+    .startGameBtn {
+      margin-bottom: 10rem;
+      font-size: 16px;
+      padding: .5rem 3rem;
+      border-radius: .3rem;
+      background-color: white;
+    }
+    
+    .startGameBtn:hover {
+      cursor: pointer;
+      background-color: #ccc;
+    }
+
+    .gameOverScreen {
+      font-size: 20px;
+      text-align: center;
+    }
+
+    .score {
       display: inline;
-      color: white;
-      margin-top: 0;
-      margin-bottom: 0;
-      font-size: 25px;
+      margin: 0;
+    }
+
+    .loginBtn {
+      padding: .8em;
+      border-radius: 10px;
+      border: none;
+      background: #1e6f5c;
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
     }
   }
 }
