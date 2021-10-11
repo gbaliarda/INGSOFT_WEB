@@ -21,7 +21,9 @@ export default function Navbar() {
               <span className={styles.energyText}>{`${user.attributes.energy}`}/20</span>
               <img src="energyIcon.svg" alt="energyIcon" className={styles.energyIcon}/>
             </div>
-            <span className={styles.address}>{`${user.attributes.ethAddress.substring(0,5)}...${user.attributes.ethAddress.slice(-4)}`}</span> 
+            <Link href="/account">
+              <span className={styles.address}>{`${user.attributes.ethAddress.substring(0,5)}...${user.attributes.ethAddress.slice(-4)}`}</span> 
+            </Link>
           </div>
         }
         { isAuthenticated && <button onClick={logout} >Desconectarse</button> }

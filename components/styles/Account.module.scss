@@ -1,0 +1,212 @@
+.container {
+  margin-top: 5vh;
+
+  .title {
+    font-weight: 400;
+    color: white;
+    font-size: 30px;
+    margin-left: 10vw;
+  }
+
+  .accountHeader {
+    display: flex;
+    vertical-align: middle;
+
+    .exchangeBtn {
+      height: 100%;
+      background: #1e6f5c;
+      align-self: center;
+      vertical-align: middle;
+      display: flex;
+      font-size: 24px;
+      border-radius: 10px;
+      border: none;
+      text-decoration: none;
+      cursor: pointer;
+      padding: .4em .6em;
+      margin-left: 5vw;
+      color: white;
+    }
+
+    .swapIcon {
+      height: 26px;
+      color: white;
+    }
+
+    .balance {
+      background-color: #1E3B3C;
+      border-radius: 10px;
+      margin-left: 10vw;
+      width: 40vw;
+      min-width: 400px;
+      height: 20vh;
+      min-height: 150px;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      align-items: center;
+      
+      .showCryv{
+        display: flex;
+        .cryvLogo {
+          width: 70px;
+        }
+
+        .cryvDetails {
+          margin-left: 1vw;
+
+          .cryvTitle {
+            color: #b248d9;
+            font-weight: 500;
+          }
+
+          .cryvAmount {
+            color:white;
+            font-weight: 500;
+          }
+        }
+      }
+
+      .showCe{
+        display: flex;
+
+        .ceLogo {
+          width: 50px;
+        }
+
+        .ceDetails {
+          margin-left: 1vw;
+          
+          .ceTitle {
+            color: red;
+            font-weight: 500;
+          }
+
+          .ceAmount {
+            color:white;
+            font-weight: 500;
+          }
+        }
+      }
+
+      .showBnb{
+        display: flex;
+
+        .bnbLogo {
+          position: relative;
+          width: 60px;
+        }
+
+        .bnbDetails {
+          margin-left: 1vw;
+          
+          .bnbTitle {
+            color: #edaf4b;
+            font-weight: 500;
+          }
+
+          .bnbAmount {
+            color:white;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+  } 
+
+  .popupExchange, .overlay {
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    position: fixed;
+  }
+
+  .overlay {
+    background: rgba(0,0,0,0.5);
+  }
+
+  .popupContent {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #1E3B3C;
+    padding: 14px 28px;
+    border-radius: 10px;
+    width: 30vw;
+    min-width: 400px;
+  
+    .popupTitle {
+      text-align: center;
+      color: white;
+      font-weight: 400;
+      margin-top: .5em;
+    }
+
+    .popupInputs {
+      display: flex;
+      justify-content: space-between; 
+      height: 30px;
+    }
+
+    .maxQtyCE {
+      position: absolute;
+      background: none;
+      cursor: pointer;
+      border: none;
+      color: #1e6f5c;
+      left: 36%;
+      top: 51%;
+      font-size: 14px;
+    }
+
+    .inputCE, .inputCRYV {
+      font-size: 16px;
+      padding: .2em;
+      border: 1px solid black;
+      border-radius: 3px;
+      width: 45%;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    .popupBalance {
+      margin-top: 0;
+      margin-bottom: 0;
+      margin-left: 4px;
+      font-size: 14px;
+      color: white;
+    }
+
+    .inputCE:focus, .inputCRYV:focus {
+      outline: none;
+    }
+
+    .confirmBtn {
+      margin: auto;
+      display: block;
+      text-decoration: none;
+      box-shadow: none;
+      border: none;
+      background-color: #1e6f5c;
+      color: white;
+      border-radius: 7px;
+      font-size: 20px;
+      cursor: pointer;
+      padding: .4em .6em;
+      margin-top: 1em;
+    }
+
+  }
+}

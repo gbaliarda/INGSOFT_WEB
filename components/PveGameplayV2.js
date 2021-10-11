@@ -53,6 +53,8 @@ const PveGameplay = () => {
     let scoreText = document.getElementById("scorepve");
     scoreText.textContent = score;
     user.set("energy", user.attributes.energy-1);
+    user.set("ceAmount", user.attributes.ceAmount+score/100);
+    document.getElementById("winCEAmount").textContent = score/100;
     await user.save();
   }
 
@@ -126,7 +128,7 @@ const PveGameplay = () => {
       <div className={styles.container}>
         <h2 className={styles.showScore}>Tu puntuacion: {`${score}`}</h2>
         <div className={styles.gameArea} style={{width: `${CANVAS_SIZE[0]}px`, height: `${CANVAS_SIZE[1]}px`}}>
-            {gameOver && <div className={styles.gameOverScreen}>Perdiste! <br/> Tu puntuacion: <p className={styles.score} id="scorepve"></p></div>}
+            {gameOver && <div className={styles.gameOverScreen}>Perdiste! <br/> Tu puntuacion: <p className={styles.score} id="scorepve"></p> <br/> Ganaste <p className={styles.score} id="winCEAmount">0</p> CE</div>}
             {isAuthenticated && user.attributes.energy === 0 && <p className={styles.noEnergy}>No tienes energía suficiente para jugar!</p>}
             {isAuthenticated && speed == null && <button onClick={startGame} className={styles.startGameBtn}>Start Game</button>}
             {!isAuthenticated && <button onClick={authenticate} className={styles.loginBtn}>Iniciar Sesión</button>}
