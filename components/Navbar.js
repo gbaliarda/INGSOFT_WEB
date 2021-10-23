@@ -12,8 +12,6 @@ export default function Navbar() {
     <nav className={styles.nav}>
       <Link href="/">CryptoViper</Link>
       <div className={styles.links}>
-        <Link href="/">Inicio</Link>
-        <Link href="/">WhitePaper</Link>
         <Link href="/pve">PvE</Link>
         { isAuthenticated && 
           <div className={styles.userInfo}>
@@ -22,12 +20,13 @@ export default function Navbar() {
               <img src="energyIcon.svg" alt="energyIcon" className={styles.energyIcon}/>
             </div>
             <Link href="/account">
-              <span className={styles.address}>{`${user.attributes.ethAddress.substring(0,5)}...${user.attributes.ethAddress.slice(-4)}`}</span> 
+              Mi cuenta
             </Link>
+            <span className={styles.address}>{`${user.attributes.ethAddress.substring(0,5)}...${user.attributes.ethAddress.slice(-4)}`}</span> 
           </div>
         }
         { isAuthenticated && <button onClick={logout} >Desconectarse</button> }
-        { !isAuthenticated && <button onClick={authenticate}>Iniciar Sesión</button>}
+        { !isAuthenticated && <button onClick={() => authenticate({signingMessage: "CryptoViper quiere acceder a tu MetaMask para iniciar sesión"})}>Iniciar Sesión</button>}
       </div>
     </nav>
   )

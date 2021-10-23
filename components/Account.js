@@ -1,7 +1,7 @@
 import styles from './styles/Account.module.scss'
 import { useMoralis } from "react-moralis";
 import Moralis from 'moralis';
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Spinner from './Spinner';
 import StatusMessage from './StatusMessage';
 
@@ -15,6 +15,7 @@ export default function Account() {
   const [loadingSpinner, setLoadingSpinner ] = useState(false);
   const [status, setStatus] = useState({});
   const [statusIsOpen, setStatusIsOpen] = useState(false);
+  const [currentContainer, setCurrentContainer] = useState('');
 
   const { isAuthenticated, user } = useMoralis();
 
@@ -118,18 +119,19 @@ export default function Account() {
     setLoadingSpinner(false);
   }
 
-  async function testing() {
-    const query = new Moralis.Query("BscTokenBalance");
-
-    const result = await query.map((token) => token.attributes);
-    console.log(result);
-  }
-
   useEffect(() => {
     getCryptoViperToken();
     getCeToken();
     getBnbToken();
+    setCurrentContainer(document.getElementsByClassName(styles.navActive)[0].textContent);
   });
+
+  const addActive = (el) => {
+    var list = document.getElementsByClassName(styles.navActive);
+    list[0].classList.remove(styles.navActive);
+    el.target.classList.add(styles.navActive);
+    setCurrentContainer(el.target.textContent);
+  }
 
   return (
     <div className={styles.container}>
@@ -158,7 +160,29 @@ export default function Account() {
             </div>
           </div>
         </div>
-        <button className={styles.exchangeBtn} onClick={toggleExchangePopup}>CE <img src="swap-horizontal.svg" alt="por" className={styles.swapIcon} /> CRYV</button>
+        <button className={styles.exchangeBtn} onClick={toggleExchangePopup}>CE x CRYV</button>
+      </div>
+      <div className={styles.inventory}>
+        <div className={styles.inventoryHeader}>
+          <span className={`${styles.inventoryHeaderNav} ${styles.navActive}`} onClick={addActive}>Serpientes</span>
+          <span className={styles.inventoryHeaderNav} onClick={addActive}>Huevos</span>
+          <span className={styles.inventoryHeaderNav} onClick={addActive}>Cuevas</span>
+        </div>
+        <div className={styles.inventoryContent}>
+          { (currentContainer == 'Serpientes' || currentContainer == '') ?
+            <div className={styles.serpentContainer}>
+              <span>Sección en desarrollo</span>  
+            </div>
+          : (currentContainer == 'Huevos') ? 
+            <div className={styles.huevosContainer}>
+              <span>Sección en desarrollo</span>
+            </div>
+          :
+            <div className={styles.cuevasContainer}>
+              <span>Sección en desarrollo</span>
+            </div> 
+          }
+        </div>
       </div>
 
       {exchangePopup && (
@@ -166,12 +190,21 @@ export default function Account() {
         <div className={styles.overlay} onClick={toggleExchangePopup}></div>
         <div className={styles.popupContent}>
           <h2 className={styles.popupTitle}>Intercambiar CE por CRYV</h2>
-          <p className={styles.popupBalance}>Balance: {`${ceBalance}`}</p>
+          <div className={styles.popupHeader}>
+            <span className={styles.popupExchangeValue}>100 CE = 1 CRYV</span>
+            <span className={styles.popupBalance}>Balance: {`${ceBalance}`}</span>
+          </div>
           <div className={styles.popupInputs}>
-            <input type="number" placeholder="Cantidad de CE" className={styles.inputCE} onChange={changeCRYV} id="exchangeInputCE" autoComplete='off' max="5"/>
-            <button className={styles.maxQtyCE} onClick={setMaxCE}>MAX</button>
-            <img src="icons8-arrow-48.png" />
-            <input type="number" placeholder="Cantidad de CRYV" className={styles.inputCRYV} onChange={changeCE} id="exchangeInputCRYV" autoComplete='off' />
+            <div className={styles.ceInputExchange}>
+              <img src="tokeningame.svg" className={styles.tokenIcon}/>
+              <input type="number" placeholder="Cantidad de CE" className={styles.inputCE} onChange={changeCRYV} id="exchangeInputCE" autoComplete='off' max="5"/>
+              <button className={styles.maxQtyCE} onClick={setMaxCE}>MAX</button>
+            </div>
+            <img src="exchangeArrow.svg" className={styles.exchangeArrow} />
+            <div className={styles.cryvInputExchange}>
+              <img src="tokenprincipal.svg" className={styles.cryvIcon}/>
+              <input type="number" placeholder="Cantidad de CRYV" className={styles.inputCRYV} onChange={changeCE} id="exchangeInputCRYV" autoComplete='off' />
+            </div>
           </div>
           {!loadingSpinner? (
             <button className={styles.confirmBtn} onClick={confirmExchange}>Aceptar</button>
