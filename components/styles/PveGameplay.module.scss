@@ -1,53 +1,47 @@
 .container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  min-height: calc(100vh - 79px);
+
+  * {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  padding: 50px 200px;
   text-align: center;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
 
-  .showScore {
-    color:white;
-    font-size: 26px;
-    font-weight: 400;
-    margin-top: 0;
+  .scoreModal {
+    font-size: 1.3em;
+    margin-bottom: 1em;
   }
 
-  .gameArea {
-    display: flex;
-    flex-direction: column;
-    margin: auto;
-    align-items: center;
-    justify-content: center;
-    background-color: white;
-
-    
-    .startGameBtn {
-      margin-bottom: 10rem;
-      font-size: 16px;
-      padding: .5rem 3rem;
-      border-radius: .3rem;
-      background-color: white;
-    }
-    
-    .startGameBtn:hover {
-      cursor: pointer;
-      background-color: #ccc;
-    }
-
-    .gameOverScreen {
-      font-size: 20px;
-      text-align: center;
-    }
-
-    .score {
-      display: inline;
-      margin: 0;
-    }
-
-    .loginBtn {
-      padding: .8em;
-      border-radius: 10px;
-      border: none;
-      background: #1e6f5c;
-      color: #fff;
-      font-size: 1em;
-      cursor: pointer;
-    }
+  button {
+    border: none;
+    padding: 15px 50px;
+    background: rgb(59, 130, 246);
+    color: #fff;
+    border-radius: 10px;
   }
+}
+
+.score {
+  margin-top: 25px;
+  color: #fff;
+  font-size: 25px;
+
+  /* Para que no se seleccione el texto en azul */
+  user-select: none;
 }
