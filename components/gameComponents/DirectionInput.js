@@ -28,6 +28,7 @@ export default class DirectionInput {
 
   init() {
     document.addEventListener("keydown", e => {
+      e.preventDefault();
       const dir = this.map[e.code];
       if (dir && !this.heldDirections.includes(dir) && !this.heldDirections.includes(this.opp[dir]))
         this.heldDirections.unshift(dir);

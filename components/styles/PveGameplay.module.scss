@@ -3,7 +3,7 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  min-height: calc(100vh - 79px);
+  min-height: calc(100vh - 80px);
 
   * {
     margin: 0;
@@ -34,11 +34,12 @@
     background: rgb(59, 130, 246);
     color: #fff;
     border-radius: 10px;
+    cursor: pointer;
   }
 }
 
 .score {
-  margin-top: 25px;
+  padding-bottom: 25px;
   color: #fff;
   font-size: 25px;
 

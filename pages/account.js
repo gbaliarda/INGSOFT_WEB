@@ -1,5 +1,5 @@
 // Styles
-import styles from '../styles/Pve.module.scss'
+import styles from '../styles/Account.module.scss'
 // Components
 import { MoralisProvider } from "react-moralis";
 import Navbar from '../components/Navbar'

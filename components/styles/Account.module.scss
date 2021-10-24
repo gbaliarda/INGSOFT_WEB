@@ -1,11 +1,27 @@
 .container {
-  margin-top: 5vh;
+  padding-top: 5vh;
+  height: calc(100vh - 80px);
+
+  .loginBtn {
+    cursor: pointer;
+    outline: none;
+    background-color: #033557;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 24px;
+    padding: .4em 1em;
+    display: block;
+    margin: auto;
+    margin-top: 10%;
+  }
 
   .title {
     font-weight: 400;
     color: white;
     font-size: 30px;
     margin-left: 10vw;
+    margin-bottom: 20px;
   }
 
   .accountHeader {

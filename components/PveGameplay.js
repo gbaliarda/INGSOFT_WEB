@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useMoralis } from "react-moralis";
+import Router from "next/router";
 import styles from './styles/PveGameplay.module.scss'
 import Food from "./gameComponents/Food"
 import DirectionInput from "./gameComponents/DirectionInput"
@@ -7,19 +8,22 @@ import Particle from "./gameComponents/Particle"
 import Snake from "./gameComponents/Snake"
 
 const canvasWidth = 1250;
-const canvasHeight = 650;
+const canvasHeight = 600;
 
 const PveGameplay = () => {
   const canvasRef = useRef();
   const buttonRef = useRef();
   const [score, setScore] = useState(0);
   const [gameOver, setGameover] = useState(true);
-  const { isAuthenticated, authenticate, isAuthenticating, authError, logout, user } = useMoralis();
+  const { isAuthenticated, authenticate, user } = useMoralis();
 
   let player, food, animationId, particles, ctx, scoreAux;
   const directionInput = new DirectionInput();
 
   useEffect(() => {
+    if(user == null)
+      return;
+
     ctx = canvasRef.current.getContext("2d");
     canvasRef.current.width = canvasWidth;
     canvasRef.current.height = canvasHeight;
@@ -46,7 +50,8 @@ const PveGameplay = () => {
       this.closePath();
       return this;
     }
-  }, []);
+
+  }, [user]);
 
   async function init() {
     const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
@@ -57,15 +62,19 @@ const PveGameplay = () => {
     directionInput.init();
     particles = [];
     
-    console.log(isAuthenticated, user);
-    // user.set("energy", user.attributes.energy-1);
-    // await user.save();
+    user.set("energy", user.attributes.energy-1);
+    await user.save();
   }
 
   async function animate() {
+    if(Router.pathname != '/pve') {
+      cancelAnimationFrame(requestAnimationFrame(animate));
+      setGameover(true);
+      return;
+    }
     animationId = requestAnimationFrame(animate);
     ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
   
     player.setDirection(directionInput.direction);
     player.update(ctx);
@@ -114,19 +123,19 @@ const PveGameplay = () => {
     ) {
       cancelAnimationFrame(animationId);
       setGameover(true);
-      console.log(isAuthenticated, user);
-      // user.set("energy", user.attributes.energy-1);
-      // await user.save();
+      user.set("ceAmount", user.attributes.ceAmount+scoreAux/100);
+      await user.save();
     }
   }
 
   return (
     <div className={styles.container}>
+        <p className={styles.score}>Puntuación: <span>{score}</span></p>
       <div className={styles.modal} style={{display: gameOver ? "flex" : "none"}}>
         <p className={styles.scoreModal}>Puntuación: {score}</p>
         <p className={styles.scoreModal} style={{display: score > 0 ? "block" : "none"}}>Recompensa: {score / 100} CE</p>
         {!isAuthenticated ? 
-          <button onClick={authenticate}>Iniciar Sesión</button>
+          <button onClick={() => authenticate({signingMessage: "CryptoViper quiere acceder a tu MetaMask para iniciar sesión"})}>Iniciar Sesión</button>
         :
           user.attributes.energy == 0 &&
             <button className={styles.disabled}>No dispones de energía para jugar</button>
@@ -134,7 +143,6 @@ const PveGameplay = () => {
         <button style={{display: isAuthenticated && user.attributes.energy > 0 ? "block" : "none"}} ref={buttonRef}>Iniciar juego</button>
       </div>
       <canvas className={styles.canvas} ref={canvasRef}></canvas>
-      <p className={styles.score}>Puntuación: <span>{score}</span></p>
     </div>
   );
 }

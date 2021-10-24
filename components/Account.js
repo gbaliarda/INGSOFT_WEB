@@ -16,8 +16,9 @@ export default function Account() {
   const [status, setStatus] = useState({});
   const [statusIsOpen, setStatusIsOpen] = useState(false);
   const [currentContainer, setCurrentContainer] = useState('');
+  const [accountIsMounted, setAccountIsMounted] = useState(true);
 
-  const { isAuthenticated, user } = useMoralis();
+  const { isAuthenticated, user, authenticate } = useMoralis();
 
   const toggleExchangePopup = () => {
     setExchangePopup(!exchangePopup);
@@ -37,15 +38,16 @@ export default function Account() {
 
     const results = cryvResult.attributes;
   
-    setCryvBalance(results.balance/(10**18));
+    if(accountIsMounted)
+      setCryvBalance(results.balance/(10**18));
   
   }
 
-  async function getCeToken() {
+  function getCeToken() {
     if(!isAuthenticated)
       return;
-
-    setCeBalance(user.attributes.ceAmount);
+    
+      setCeBalance(user.attributes.ceAmount);
   }
 
   async function getBnbToken() {
@@ -61,7 +63,8 @@ export default function Account() {
 
     const results = bnbResult.attributes;
   
-    setBnbBalance((results.balance/(10**18)).toFixed(3));
+    if(accountIsMounted)
+      setBnbBalance((results.balance/(10**18)).toFixed(3));
   
   }
 
@@ -107,24 +110,40 @@ export default function Account() {
       if(result.status != 200)
         throw new Error(d.message);
       user.set("ceAmount", parseInt(user.attributes.ceAmount-ceToExchange));
+      if(user == null)
+        return;
       await user.save();
+      if(!accountIsMounted)
+        return;
       setStatus({ message: `${ceToExchange}CE intercambiados con exito por ${cryvToExchange}CRYV`, error: false})
       toggleExchangePopup();
     } catch (e) {
       console.log(e);
+      if(!accountIsMounted)
+        return;
       setStatus({ message: 'Error al intercambiar CE por CRYV: '+e.message, error: true});
     }
+    if(!accountIsMounted)
+      return;
     setStatusIsOpen(true);
     setTimeout(() => setStatusIsOpen(false),5000);
     setLoadingSpinner(false);
   }
 
   useEffect(() => {
+    if(!isAuthenticated)
+      return;
+    setAccountIsMounted(true);
     getCryptoViperToken();
     getCeToken();
     getBnbToken();
-    setCurrentContainer(document.getElementsByClassName(styles.navActive)[0].textContent);
-  });
+
+    accountIsMounted && setCurrentContainer(document.getElementsByClassName(styles.navActive)[0].textContent);
+
+    return () => {
+      setAccountIsMounted(false);
+    }
+  }, [isAuthenticated]);
 
   const addActive = (el) => {
     var list = document.getElementsByClassName(styles.navActive);
@@ -135,87 +154,95 @@ export default function Account() {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>Mi cuenta</h2>
-      <div className={styles.accountHeader}>
-        <div className={styles.balance}>
-          <div className={styles.showCryv}>
-            <img src="tokenprincipal.svg" alt="CryptoViper token" className={styles.cryvLogo}/>
-            <div className={styles.cryvDetails}>
-              <h3 className={styles.cryvTitle}>CRYV</h3>
-              <h3 className={styles.cryvAmount}>{`${cryvBalance}`}</h3>
+      { isAuthenticated ? (
+      <div>
+        <h2 className={styles.title}>Mi cuenta</h2>
+        <div className={styles.accountHeader}>
+          <div className={styles.balance}>
+            <div className={styles.showCryv}>
+              <img src="tokenprincipal.svg" alt="CryptoViper token" className={styles.cryvLogo}/>
+              <div className={styles.cryvDetails}>
+                <a href="https://testnet.bscscan.com/token/0xd1af9c4f9ba37d0c889353515898b479022355f5" target="_blank">
+                  <h3 className={styles.cryvTitle}>CRYV</h3>
+                </a>
+                <h3 className={styles.cryvAmount}>{`${cryvBalance}`}</h3>
+              </div>
+            </div>
+            <div className={styles.showCe}>
+              <img src="tokeningame.svg" alt="Crimson Elixir token" className={styles.ceLogo}/>
+              <div className={styles.ceDetails}>
+                <h3 className={styles.ceTitle}>CE</h3>
+                <h3 className={styles.ceAmount}>{`${ceBalance}`}</h3>
+              </div>
+            </div>
+            <div className={styles.showBnb}>
+              <img src="bnb.svg" alt="Binance token" className={styles.bnbLogo}/>
+              <div className={styles.bnbDetails}>
+                <h3 className={styles.bnbTitle}>BNB</h3>
+                <h3 className={styles.bnbAmount}>{`${bnbBalance}`}</h3>
+              </div>
             </div>
           </div>
-          <div className={styles.showCe}>
-            <img src="tokeningame.svg" alt="Crimson Elixir token" className={styles.ceLogo}/>
-            <div className={styles.ceDetails}>
-              <h3 className={styles.ceTitle}>CE</h3>
-              <h3 className={styles.ceAmount}>{`${ceBalance}`}</h3>
-            </div>
+          <button className={styles.exchangeBtn} onClick={toggleExchangePopup}>CE x CRYV</button>
+        </div>
+        <div className={styles.inventory}>
+          <div className={styles.inventoryHeader}>
+            <span className={`${styles.inventoryHeaderNav} ${styles.navActive}`} onClick={addActive}>Serpientes</span>
+            <span className={styles.inventoryHeaderNav} onClick={addActive}>Huevos</span>
+            <span className={styles.inventoryHeaderNav} onClick={addActive}>Cuevas</span>
           </div>
-          <div className={styles.showBnb}>
-            <img src="bnb.svg" alt="Binance token" className={styles.bnbLogo}/>
-            <div className={styles.bnbDetails}>
-              <h3 className={styles.bnbTitle}>BNB</h3>
-              <h3 className={styles.bnbAmount}>{`${bnbBalance}`}</h3>
-            </div>
+          <div className={styles.inventoryContent}>
+            { (currentContainer == 'Serpientes' || currentContainer == '') ?
+              <div className={styles.serpentContainer}>
+                <span>Sección en desarrollo</span>  
+              </div>
+            : (currentContainer == 'Huevos') ? 
+              <div className={styles.huevosContainer}>
+                <span>Sección en desarrollo</span>
+              </div>
+            :
+              <div className={styles.cuevasContainer}>
+                <span>Sección en desarrollo</span>
+              </div> 
+            }
           </div>
         </div>
-        <button className={styles.exchangeBtn} onClick={toggleExchangePopup}>CE x CRYV</button>
-      </div>
-      <div className={styles.inventory}>
-        <div className={styles.inventoryHeader}>
-          <span className={`${styles.inventoryHeaderNav} ${styles.navActive}`} onClick={addActive}>Serpientes</span>
-          <span className={styles.inventoryHeaderNav} onClick={addActive}>Huevos</span>
-          <span className={styles.inventoryHeaderNav} onClick={addActive}>Cuevas</span>
-        </div>
-        <div className={styles.inventoryContent}>
-          { (currentContainer == 'Serpientes' || currentContainer == '') ?
-            <div className={styles.serpentContainer}>
-              <span>Sección en desarrollo</span>  
-            </div>
-          : (currentContainer == 'Huevos') ? 
-            <div className={styles.huevosContainer}>
-              <span>Sección en desarrollo</span>
-            </div>
-          :
-            <div className={styles.cuevasContainer}>
-              <span>Sección en desarrollo</span>
-            </div> 
-          }
-        </div>
-      </div>
 
-      {exchangePopup && (
-      <div className={styles.popupExchange}>
-        <div className={styles.overlay} onClick={toggleExchangePopup}></div>
-        <div className={styles.popupContent}>
-          <h2 className={styles.popupTitle}>Intercambiar CE por CRYV</h2>
-          <div className={styles.popupHeader}>
-            <span className={styles.popupExchangeValue}>100 CE = 1 CRYV</span>
-            <span className={styles.popupBalance}>Balance: {`${ceBalance}`}</span>
-          </div>
-          <div className={styles.popupInputs}>
-            <div className={styles.ceInputExchange}>
-              <img src="tokeningame.svg" className={styles.tokenIcon}/>
-              <input type="number" placeholder="Cantidad de CE" className={styles.inputCE} onChange={changeCRYV} id="exchangeInputCE" autoComplete='off' max="5"/>
-              <button className={styles.maxQtyCE} onClick={setMaxCE}>MAX</button>
+        {exchangePopup && (
+        <div className={styles.popupExchange}>
+          <div className={styles.overlay} onClick={toggleExchangePopup}></div>
+          <div className={styles.popupContent}>
+            <h2 className={styles.popupTitle}>Intercambiar CE por CRYV</h2>
+            <div className={styles.popupHeader}>
+              <span className={styles.popupExchangeValue}>100 CE = 1 CRYV</span>
+              <span className={styles.popupBalance}>Balance: {`${ceBalance}`}</span>
             </div>
-            <img src="exchangeArrow.svg" className={styles.exchangeArrow} />
-            <div className={styles.cryvInputExchange}>
-              <img src="tokenprincipal.svg" className={styles.cryvIcon}/>
-              <input type="number" placeholder="Cantidad de CRYV" className={styles.inputCRYV} onChange={changeCE} id="exchangeInputCRYV" autoComplete='off' />
+            <div className={styles.popupInputs}>
+              <div className={styles.ceInputExchange}>
+                <img src="tokeningame.svg" className={styles.tokenIcon}/>
+                <input type="number" placeholder="Cantidad de CE" className={styles.inputCE} onChange={changeCRYV} id="exchangeInputCE" autoComplete='off' max="5"/>
+                <button className={styles.maxQtyCE} onClick={setMaxCE}>MAX</button>
+              </div>
+              <img src="exchangeArrow.svg" className={styles.exchangeArrow} />
+              <div className={styles.cryvInputExchange}>
+                <img src="tokenprincipal.svg" className={styles.cryvIcon}/>
+                <input type="number" placeholder="Cantidad de CRYV" className={styles.inputCRYV} onChange={changeCE} id="exchangeInputCRYV" autoComplete='off' />
+              </div>
             </div>
+            {!loadingSpinner? (
+              <button className={styles.confirmBtn} onClick={confirmExchange}>Aceptar</button>
+              ):(
+              <div className={styles.spinBtn}><Spinner /></div>
+            )}
           </div>
-          {!loadingSpinner? (
-            <button className={styles.confirmBtn} onClick={confirmExchange}>Aceptar</button>
-            ):(
-            <div className={styles.spinBtn}><Spinner /></div>
-          )}
         </div>
-      </div>
-      )}
+        )}
 
-      <StatusMessage status={status} isOpen={statusIsOpen} setIsOpen={setStatusIsOpen} />
+        <StatusMessage status={status} isOpen={statusIsOpen} setIsOpen={setStatusIsOpen} />
+      </div>
+      ) :
+        <button className={styles.loginBtn} onClick={() => authenticate({signingMessage: "CryptoViper quiere acceder a tu MetaMask para iniciar sesión"})}>Iniciar Sesión</button>
+      }
     </div>
   )
 
