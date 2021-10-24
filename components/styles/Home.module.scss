@@ -1,0 +1,46 @@
+.container {
+  width: 90%;
+  margin: auto;
+  padding-top: 22vh;
+  display: flex;
+  justify-content: space-around;
+  z-index: 1;
+
+  .leftSec {
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    color: white;
+
+    h2 {
+      color: #dbdbdb;
+
+      a {
+        text-decoration: underline;
+        color: #D0DB4E;
+      }
+    }
+
+    .buttons {
+      margin-top: 1em;
+      display:flex;
+      justify-content: space-between;
+
+      .btn {
+        padding: .8em 3em;
+        font-size: 20px;
+        background-color: #4F3F64;
+        color: white;
+        border-radius: 10px;
+      } 
+    }
+  }
+
+  .rightSec {
+    text-align: center;
+
+    img {
+      width: 67%;
+    }
+  }
+}

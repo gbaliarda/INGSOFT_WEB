@@ -14,18 +14,26 @@
 
     .exchangeBtn {
       height: 100%;
-      background: #1e6f5c;
+      background: #000;
+      border: 2px solid #033557;
       align-self: center;
       vertical-align: middle;
       display: flex;
+      letter-spacing: 2px;
       font-size: 24px;
-      border-radius: 10px;
-      border: none;
+      border-radius: 5px;
       text-decoration: none;
       cursor: pointer;
-      padding: .4em .6em;
-      margin-left: 5vw;
+      padding: .8em 1em;
+      margin: auto;
       color: white;
+      transition: 0.5s;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 500;
+    }
+
+    .exchangeBtn:hover {
+      background-color: #033557;
     }
 
     .swapIcon {
@@ -34,10 +42,10 @@
     }
 
     .balance {
-      background-color: #1E3B3C;
+      background-color: #04253b;
       border-radius: 10px;
       margin-left: 10vw;
-      width: 40vw;
+      width: 50vw;
       min-width: 400px;
       height: 20vh;
       min-height: 150px;
@@ -133,23 +141,57 @@
     top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: #1E3B3C;
+    background: #04253b;
     padding: 14px 28px;
     border-radius: 10px;
     width: 30vw;
     min-width: 400px;
+    opacity: 0;
+    animation: fade .2s forwards;
+
+    @keyframes fade {
+      from {
+        opacity: 0%;
+      }
+      to {
+        opacity: 103%;
+      }
+    }
   
     .popupTitle {
       text-align: center;
       color: white;
       font-weight: 400;
       margin-top: .5em;
+      margin-bottom: 30px;
     }
 
     .popupInputs {
-      display: flex;
-      justify-content: space-between; 
-      height: 30px;
+      margin-bottom: 40px;
+      text-align: center;
+
+      .ceInputExchange, .cryvInputExchange {
+        position: relative;
+        display: block;
+        width: 100%;
+        display: flex;
+        align-items: center;
+      }
+
+      .tokenIcon {
+        width: 40px;
+        margin: 0px 11px;
+      }
+
+      .cryvIcon {
+        width: 48px;
+        margin: 0px 8px;
+      }
+
+      .exchangeArrow {
+        width: 25px;
+        margin: 20px 0;
+      }
     }
 
     .maxQtyCE {
@@ -157,18 +199,21 @@
       background: none;
       cursor: pointer;
       border: none;
-      color: #1e6f5c;
-      left: 36%;
-      top: 51%;
-      font-size: 14px;
+      color: #fff;
+      right: 10px;
+      font-size: 16px;
     }
 
     .inputCE, .inputCRYV {
-      font-size: 16px;
-      padding: .2em;
+      font-size: 20px;
+      padding: .3em .5em;
       border: 1px solid black;
-      border-radius: 3px;
-      width: 45%;
+      border-radius: 10px;
+      background-color: #000;
+      color: white;
+      width: 100%;
+      height: 60px;
+      margin-bottom: 0px;
     }
 
     input::-webkit-outer-spin-button,
@@ -181,12 +226,16 @@
       -moz-appearance: textfield;
     }
 
-    .popupBalance {
-      margin-top: 0;
-      margin-bottom: 0;
-      margin-left: 4px;
-      font-size: 14px;
-      color: white;
+    .popupHeader {
+      margin-bottom: 40px;
+      display: flex;
+      justify-content: space-between;
+
+      .popupBalance, .popupExchangeValue {
+        margin-top: 0;
+        font-size: 20px;
+        color: white;
+      }
     }
 
     .inputCE:focus, .inputCRYV:focus {
@@ -199,13 +248,14 @@
       text-decoration: none;
       box-shadow: none;
       border: none;
-      background-color: #1e6f5c;
+      background-color: #033557;
       color: white;
       border-radius: 7px;
       font-size: 20px;
       cursor: pointer;
-      padding: .4em .6em;
+      padding: .6em 1em;
       margin-top: 1em;
+      margin-bottom: 20px;
     }
 
     .spinBtn {
@@ -213,12 +263,57 @@
       width: 93px;
       height: 39px;
       margin: auto;
-      background-color: #1e6f5c;
+      background-color: #033557;
       font-size: 20px;
       margin-top: 1em;
       border-radius: 7px;
-      padding: .4em .6em;
+      padding: 1.17em 2.75em;
+      margin-bottom: 20px;
     }
 
   }
+
+  .inventory {
+    width: 80vw;
+    height: 40vh;
+    background-color: #04253b;
+    margin: auto;
+    margin-top: 50px;
+    border-radius: 10px;
+
+    .inventoryHeader {
+      width: 100%;
+      height: 15%;
+      display: flex;
+      align-items: center;
+      
+      .inventoryHeaderNav {
+        color: white;
+        margin-left: 40px;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 5px;
+      }
+
+      .navActive {
+        border-bottom: 2px solid #fff;
+      }
+    }
+
+    .inventoryContent {
+      width: 100%;
+      padding-top: 2%;
+      height: 85%;
+      text-align: center;
+
+      span {
+        color: white;
+        font-size: 32px;
+        display: block;
+        margin-top: 50px;
+      }
+    }
+  }
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap');

@@ -6,6 +6,7 @@
   align-items: center;
   justify-content: space-between;
   font-weight: 400;
+  font-family: 'Montserrat', sans-serif;
 
   a {
     color: #fff;
@@ -30,7 +31,7 @@
       padding: .8em;
       border-radius: 10px;
       border: none;
-      background: #1e6f5c;
+      background: #033557;
       color: #fff;
       font-size: 1em;
       cursor: pointer;
@@ -39,7 +40,6 @@
     .address {
       color: #d0db4e;
       margin-left: 25px;
-      cursor: pointer;
     }
 
     .energyBox {
@@ -60,3 +60,5 @@
   
   }
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap');
