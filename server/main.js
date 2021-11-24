@@ -57,6 +57,10 @@ io.on('connection', socket => {
       }
     })
 
+    socket.on("change direction", (direction) => {
+      socket.to(socketToRoom[socket.id]).emit("update direction", { id: socket.id, direction })
+    })
+
     // Signaling simple-peer
     // socket.on("sending signal", payload => {
     //     io.to(payload.userToSignal).emit('user joined', { signal: payload.signal, callerID: payload.callerID });

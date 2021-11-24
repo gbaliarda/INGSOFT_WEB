@@ -22,7 +22,7 @@ const PvpGameplay = () => {
   const { isAuthenticated, authenticate, user } = useMoralis();
   const socketRef = useRef();
 
-  let player, enemies = [], animationId, particles, ctx, scoreAux;
+  let player, enemies = {}, animationId, particles, ctx, scoreAux;
   const directionInput = new DirectionInput();
 
   const roomID = 1;
@@ -61,6 +61,10 @@ const PvpGameplay = () => {
       console.log(`${user} joined`)
     })
 
+    socketRef.current.on("update direction", ({id, direction}) => {
+      enemies[id].setDirection(direction)
+    })
+
     // GAME
     ctx = canvasRef.current.getContext("2d");
     canvasRef.current.width = canvasWidth;
@@ -94,7 +98,7 @@ const PvpGameplay = () => {
       }
       else {
         color = `hsl(${Math.random() * 360}, 50%, 50%)`;
-        enemies.push(new Snake(currentPos.x, currentPos.y, 10, color, 4, currentPos.dir));
+        enemies[users[i]] = new Snake(currentPos.x, currentPos.y, 10, color, 4, currentPos.dir);
       }
     }
 
@@ -132,10 +136,16 @@ const PvpGameplay = () => {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
   
-    player.setDirection(directionInput.direction);
+    if (player.direction != directionInput.direction) {
+      socketRef.current.emit("change direction", directionInput.direction);
+      player.setDirection(directionInput.direction);
+    }
     player.update(ctx);
-  
-    enemies.forEach(enemy => enemy.update(ctx));
+
+
+    Object.values(enemies).forEach(enemy => {
+      enemy.update(ctx);
+    })
     
     // colision snake - food
     // const dist = Math.hypot(player.x - food.x, player.y - food.y) - food.radius - player.radius;
