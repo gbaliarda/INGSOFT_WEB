@@ -127,8 +127,8 @@ const PvpGameplay = () => {
     directionInput.init();
     particles = [];
     
-    user.set("energy", user.attributes.energy-1);
-    await user.save();
+    // user.set("energy", user.attributes.energy-1);
+    // await user.save();
   }
 
   async function endGame() {
@@ -234,7 +234,7 @@ const PvpGameplay = () => {
         <button style={{display: isAuthenticated && user.attributes.energy > 0 ? "block" : "none"}} onClick={lookForGame}>Buscar partida</button>
         : 
         <div>
-          <Spinner />
+          <Spinner color="#033557" />
         </div>}
       </div>
       <canvas className={styles.canvas} ref={canvasRef}></canvas>
