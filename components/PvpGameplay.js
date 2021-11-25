@@ -25,10 +25,7 @@ const PvpGameplay = () => {
   let player, enemies = {}, animationId, particles, ctx, scoreAux;
   const directionInput = new DirectionInput();
 
-  const roomID = 1;
-
   useEffect(() => {
-    // SOCKETS
     socketRef.current = io.connect("http://localhost:8000");
   }, [])
 
@@ -42,6 +39,7 @@ const PvpGameplay = () => {
     if(user == null)
       return;
 
+    // SOCKETS
     socketRef.current.on("start game", (users) => {
       setLookingGame(false);
       users.forEach((user) => console.log(user));
@@ -63,6 +61,31 @@ const PvpGameplay = () => {
 
     socketRef.current.on("update direction", ({id, direction}) => {
       enemies[id].setDirection(direction)
+    })
+
+    socketRef.current.on("player died", (id) => {
+      enemies[id].cells.forEach(cell => {
+        for (let i = 0; i < enemies[id].radius; i++) {
+          particles.push(
+            new Particle(
+              cell.x, 
+              cell.y, 
+              Math.random() * 2,
+              enemies[id].color,
+              { 
+                x: (Math.random() - 0.5) * (Math.random() * 5), 
+                y: (Math.random() - 0.5) * (Math.random() * 5),
+              }
+          ));
+        }
+      })
+      delete enemies[id]
+    
+      if(Object.keys(enemies).length == 0) {
+        cancelAnimationFrame(animationId);
+        setGameover(true);
+        console.log("Ganaste!");
+      }
     })
 
     // GAME
@@ -94,11 +117,11 @@ const PvpGameplay = () => {
       let currentPos = userPosition(i)
       if (users[i] == socketRef.current.id) {
         color = "white";
-        player = new Snake(currentPos.x, currentPos.y, 10, color, 4, currentPos.dir);
+        player = new Snake(currentPos.x, currentPos.y, 10, color, 3, currentPos.dir);
       }
       else {
         color = `hsl(${Math.random() * 360}, 50%, 50%)`;
-        enemies[users[i]] = new Snake(currentPos.x, currentPos.y, 10, color, 4, currentPos.dir);
+        enemies[users[i]] = new Snake(currentPos.x, currentPos.y, 10, color, 3, currentPos.dir);
       }
     }
 
@@ -143,32 +166,26 @@ const PvpGameplay = () => {
     player.update(ctx);
 
 
-    Object.values(enemies).forEach(enemy => {
+    Object.entries(enemies).forEach(([id, enemy]) => {
       enemy.update(ctx);
+      
+      // colision player - enemies o enemy - enemy
+      enemy.cells.every(cell => {
+        const dist = Math.hypot(player.x - cell.x, player.y - cell.y) - enemy.radius - player.radius;
+        if (dist < 1) {
+
+          // gana por desempate por ID
+          if (cell.x == enemy.x && cell.y == enemy.y && socketRef.current.id.localeCompare(id) < 0)
+            return false
+
+          cancelAnimationFrame(animationId);
+          setGameover(true);
+          socketRef.current.emit("players collision");
+          return false
+        }
+        return true
+      })
     })
-    
-    // colision snake - food
-    // const dist = Math.hypot(player.x - food.x, player.y - food.y) - food.radius - player.radius;
-    // if (dist < 1) {
-    //   for (let i = 0; i < food.radius * 2; i++) {
-    //     particles.push(
-    //       new Particle(
-    //         food.x, 
-    //         food.y, 
-    //         Math.random() * 2, 
-    //         food.color,
-    //         { 
-    //           x: (Math.random() - 0.5) * (Math.random() * 5), 
-    //           y: (Math.random() - 0.5) * (Math.random() * 5),
-    //         }
-    //     ));
-    //   }
-    //   food = new Food("#ff0040", 8, canvasWidth, canvasHeight);
-    //   scoreAux += 100;
-    //   setScore(scoreAux);
-    //   player.grow();
-    //   player.speedUp();
-    // }
   
     // particle animation
     particles.forEach((particle, index) => {

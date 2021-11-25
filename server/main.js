@@ -61,14 +61,11 @@ io.on('connection', socket => {
       socket.to(socketToRoom[socket.id]).emit("update direction", { id: socket.id, direction })
     })
 
-    // Signaling simple-peer
-    // socket.on("sending signal", payload => {
-    //     io.to(payload.userToSignal).emit('user joined', { signal: payload.signal, callerID: payload.callerID });
-    // });
-
-    // socket.on("returning signal", payload => {
-    //     io.to(payload.callerID).emit('receiving returned signal', { signal: payload.signal, id: socket.id });
-    // });
+    socket.on("players collision", () => {
+      socket.to(socketToRoom[socket.id]).emit("player died", socket.id)
+      rooms[socketToRoom[socket.id]].users = rooms[socketToRoom[socket.id]].users.filter(id => id != socket.id);
+      socket.leave(socketToRoom[socket.id])
+    })
 
     // socket.on('disconnect', () => {
     //     const roomID = socketToRoom[socket.id];
