@@ -15,6 +15,7 @@ const socketToRoom = {};
 const rooms = {};
 let currentRoom = null;
 const maxPlayers = 2;
+let interval;
 
 io.on('connection', socket => {
 
@@ -34,7 +35,24 @@ io.on('connection', socket => {
       socket.to(currentRoom).emit("user joined", user);
 
       if (rooms[currentRoom].users.length == maxPlayers) {
-        io.to(currentRoom).emit("start game", rooms[currentRoom].users);
+        const aux = currentRoom;
+        let secAmount = 3
+        io.to(currentRoom).emit("game found");
+
+        rooms[currentRoom].interval = setInterval(() => {
+          io.to(aux).emit("timer tick", secAmount--);
+        }, 1000)
+
+        setTimeout(() => {
+          clearInterval(rooms[aux].interval)
+
+          rooms[aux].interval = setInterval(() => {
+            io.to(aux).emit("fog tick");
+          }, 3000)
+
+          io.to(aux).emit("start game", rooms[aux].users);
+        }, 3000);
+
         currentRoom = uuid.v1();
       }
     })
@@ -70,6 +88,7 @@ io.on('connection', socket => {
 
     socket.on('game over', () => {
       const roomID = socketToRoom[socket.id];
+      clearInterval(rooms[roomID].interval);
       delete rooms[roomID]
       delete socketToRoom[socket.id]
       socket.leave(roomID)

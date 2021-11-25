@@ -17,7 +17,8 @@ const PvpGameplay = () => {
   const canvasRef = useRef();
   const buttonRef = useRef();
   const [score, setScore] = useState(0);
-  const [lookingGame, setLookingGame] = useState(false);
+  const [lookingGame, setLookingGame] = useState(0);
+  const [timer, setTimer] = useState(3);
   const [gameOver, setGameover] = useState(true);
   const { isAuthenticated, authenticate, user } = useMoralis();
   const socketRef = useRef();
@@ -30,7 +31,7 @@ const PvpGameplay = () => {
   }, [])
 
   const lookForGame = () => {
-    setLookingGame(true)
+    setLookingGame(1)
     console.log(`${user.attributes.ethAddress} looking for game`)
     socketRef.current.emit("join room", user.attributes.ethAddress)
   }
@@ -41,14 +42,20 @@ const PvpGameplay = () => {
 
     // SOCKETS
     socketRef.current.on("start game", (users) => {
-      setLookingGame(false);
-      users.forEach((user) => console.log(user));
-
       setGameover(false);
       init(users);
       animate();
       setScore(0);
+      setLookingGame(0);
     })
+
+    socketRef.current.on("game found", () => {
+      setLookingGame(2)
+    })
+
+    socketRef.current.on("timer tick", (secAmount) => {
+      setTimer(secAmount-1)
+    });
 
     socketRef.current.on("room full", (wallet) => {
       console.log(`User ${wallet} joined`);
@@ -60,6 +67,10 @@ const PvpGameplay = () => {
 
     socketRef.current.on("update direction", ({id, direction}) => {
       enemies[id].setDirection(direction)
+    })
+
+    socketRef.current.on("fog tick", () => {
+      console.log("FOG!");
     })
 
     socketRef.current.on("player died", (id) => {
@@ -83,7 +94,6 @@ const PvpGameplay = () => {
       if(Object.keys(enemies).length == 0) {
         socketRef.current.emit("game over")
         endGame()
-        console.log("Ganaste!");
       }
     })
 
@@ -127,8 +137,8 @@ const PvpGameplay = () => {
     directionInput.init();
     particles = [];
     
-    user.set("energy", user.attributes.energy-1);
-    await user.save();
+    // user.set("energy", user.attributes.energy-1);
+    // await user.save();
   }
 
   async function endGame() {
@@ -230,12 +240,18 @@ const PvpGameplay = () => {
           user.attributes.energy == 0 &&
             <button className={styles.disabled}>No dispones de energía para jugar</button>
         }
-        { !lookingGame ?
-        <button style={{display: isAuthenticated && user.attributes.energy > 0 ? "block" : "none"}} onClick={lookForGame}>Buscar partida</button>
-        : 
-        <div>
-          <Spinner />
-        </div>}
+        { lookingGame == 0 ?
+          <button style={{display: isAuthenticated && user.attributes.energy > 0 ? "block" : "none"}} onClick={lookForGame}>Buscar partida</button>
+          : lookingGame == 1 ?
+          <div>
+            <Spinner color="#033557" />
+          </div>
+          :
+          <div>
+            <p className={styles.scoreModal}>Partida encontrada!</p>
+            <p className={styles.scoreModal}>Iniciando en {timer}...</p>
+          </div>
+        }
       </div>
       <canvas className={styles.canvas} ref={canvasRef}></canvas>
     </div>
