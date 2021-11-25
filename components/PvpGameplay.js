@@ -22,7 +22,7 @@ const PvpGameplay = () => {
   const { isAuthenticated, authenticate, user } = useMoralis();
   const socketRef = useRef();
 
-  let player, enemies = {}, animationId, particles, ctx, scoreAux;
+  let player, enemies = {}, animationId, particles, ctx;
   const directionInput = new DirectionInput();
 
   useEffect(() => {
@@ -47,7 +47,6 @@ const PvpGameplay = () => {
       setGameover(false);
       init(users);
       animate();
-      scoreAux = 0;
       setScore(0);
     })
 
@@ -82,8 +81,8 @@ const PvpGameplay = () => {
       delete enemies[id]
     
       if(Object.keys(enemies).length == 0) {
-        cancelAnimationFrame(animationId);
-        setGameover(true);
+        socketRef.current.emit("game over")
+        endGame()
         console.log("Ganaste!");
       }
     })
@@ -128,8 +127,22 @@ const PvpGameplay = () => {
     directionInput.init();
     particles = [];
     
-    // user.set("energy", user.attributes.energy-1);
-    // await user.save();
+    user.set("energy", user.attributes.energy-1);
+    await user.save();
+  }
+
+  async function endGame() {
+    cancelAnimationFrame(animationId);
+    setGameover(true);
+    setScore(Object.keys(enemies).length + 1)
+    if (Object.keys(enemies).length == 0) {
+      console.log("giving 30")
+      user.set("ceAmount", user.attributes.ceAmount + 30);
+    } else if (Object.keys(enemies).length == 1) {
+      console.log("giving 10")
+      user.set("ceAmount", user.attributes.ceAmount + 10);
+    }
+    await user.save();
   }
 
   const userPosition = (pos) => {
@@ -151,7 +164,6 @@ const PvpGameplay = () => {
 
   async function animate() {
     if(Router.pathname != '/pvp') {
-      cancelAnimationFrame(requestAnimationFrame(animate));
       setGameover(true);
       return;
     }
@@ -178,9 +190,8 @@ const PvpGameplay = () => {
           if (cell.x == enemy.x && cell.y == enemy.y && socketRef.current.id.localeCompare(id) < 0)
             return false
 
-          cancelAnimationFrame(animationId);
-          setGameover(true);
           socketRef.current.emit("players collision");
+          endGame()
           return false
         }
         return true
@@ -203,19 +214,16 @@ const PvpGameplay = () => {
       player.y - player.radius < 0 ||
       player.y + player.radius > canvasHeight
     ) {
-      cancelAnimationFrame(animationId);
-      setGameover(true);
-      user.set("ceAmount", user.attributes.ceAmount+scoreAux/100);
-      await user.save();
+      socketRef.current.emit("players collision");
+      endGame()
     }
   }
 
   return (
     <div className={styles.container}>
-        <p className={styles.score}>Puntuación: <span>{score}</span></p>
       <div className={styles.modal} style={{display: gameOver ? "flex" : "none"}}>
-        <p className={styles.scoreModal}>Puntuación: {score}</p>
-        <p className={styles.scoreModal} style={{display: score > 0 ? "block" : "none"}}>Recompensa: {score / 100} CE</p>
+        <p className={styles.scoreModal} style={{display: score > 0 ? "block" : "none"}}>Terminaste en la posicion N°{score}!</p>
+        <p className={styles.scoreModal} style={{display: score > 0 ? "block" : "none"}}>Recompensa: {score == 1 ? 30 : (score == 2 ? 10 : 0)} CE</p>
         {!isAuthenticated ? 
           <button onClick={() => authenticate({signingMessage: "CryptoViper quiere acceder a tu MetaMask para iniciar sesión"})}>Iniciar Sesión</button>
         :
