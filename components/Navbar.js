@@ -15,6 +15,7 @@ export default function Navbar() {
         <Link href="/pve">PvE</Link>
         { isAuthenticated && 
           <div className={styles.userInfo}>
+            <Link href="/pvp">PvP</Link>
             <div className={styles.energyBox}>
               <span className={styles.energyText}>{`${user.attributes.energy}`}/20</span>
               <img src="energyIcon.svg" alt="energyIcon" className={styles.energyIcon}/>
