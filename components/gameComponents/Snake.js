@@ -47,21 +47,6 @@ export default class Snake {
   }
 
   update(ctx) {
-    switch (this.direction) {
-      case "left":
-        this.x -= this.velocity;
-        break;
-      case "right":
-        this.x += this.velocity;
-        break;
-      case "up":
-        this.y -= this.velocity;
-        break;
-      case "down":
-        this.y += this.velocity;
-        break;
-    }
-
     this.cells.unshift({ x: this.x, y: this.y });
 
     if (this.cells.length > this.length)

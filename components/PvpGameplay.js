@@ -58,6 +58,16 @@ const PvpGameplay = () => {
       enemies[id].setDirection(direction)
     })
 
+    socketRef.current.on("player moved", ({snake, id}) => {
+      if(socketRef.current.id == id) {
+        player.x = snake.x
+        player.y = snake.y
+      } else {
+        enemies[id].x = snake.x
+        enemies[id].y = snake.y
+      }
+    })
+
     socketRef.current.on("fog tick", () => {
       fogTicks++;
     })
@@ -149,16 +159,12 @@ const PvpGameplay = () => {
     switch(pos) {
       case 0:
         return {x: 10, y: canvasHeight/2, dir: "right"} // left
-        break;
       case 1:
         return {x: canvasWidth/2, y: 10, dir:"down"} // top
-        break;
       case 2:
         return {x: canvasWidth-10, y: canvasHeight/2, dir: "left"} //w
-        break;
       case 3:
         return {x: canvasWidth/2,  y: canvasHeight-10, dir: "up"}
-        break;
     }
   }
 
@@ -178,10 +184,9 @@ const PvpGameplay = () => {
     ctx.fillRect(0, 0, canvasWidth, fogTicks*5);
     ctx.fillRect(0, canvasHeight-fogTicks*5, canvasWidth, fogTicks*5);
   
-    if (player.direction != directionInput.direction) {
-      socketRef.current.emit("change direction", directionInput.direction);
-      player.setDirection(directionInput.direction);
-    }
+    player.setDirection(directionInput.direction);
+    
+    socketRef.current.emit("change position", player);
 
     player.update(ctx);
 
