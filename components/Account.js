@@ -162,7 +162,7 @@ export default function Account() {
             <div className={styles.showCryv}>
               <img src="tokenprincipal.svg" alt="CryptoViper token" className={styles.cryvLogo}/>
               <div className={styles.cryvDetails}>
-                <a href="https://testnet.bscscan.com/token/0xd1af9c4f9ba37d0c889353515898b479022355f5" target="_blank">
+                <a href="https://testnet.bscscan.com/token/0xd1af9c4f9ba37d0c889353515898b479022355f5" target="_blank" rel="noreferrer">
                   <h3 className={styles.cryvTitle}>CRYV</h3>
                 </a>
                 <h3 className={styles.cryvAmount}>{`${cryvBalance}`}</h3>
