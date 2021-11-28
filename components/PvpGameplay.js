@@ -27,7 +27,9 @@ const PvpGameplay = () => {
   const directionInput = new DirectionInput();
 
   useEffect(() => {
-    socketRef.current = io.connect("https://cryptoviper.herokuapp.com");
+    // socketRef.current = io.connect("https://cryptoviper.herokuapp.com");
+    socketRef.current = io.connect("https://cryv-ws.herokuapp.com/");
+    // socketRef.current = io.connect("http://localhost:8000");
   }, [])
 
   const lookForGame = () => {
@@ -55,7 +57,12 @@ const PvpGameplay = () => {
     })
 
     socketRef.current.on("update direction", ({id, direction}) => {
-      enemies[id].setDirection(direction)
+      console.log(id)
+      console.log(socketRef.current.id)
+      if (id == socketRef.current.id)
+        player.setDirection(direction)
+      else
+        enemies[id].setDirection(direction)
     })
 
     socketRef.current.on("fog tick", () => {
@@ -110,17 +117,17 @@ const PvpGameplay = () => {
   }, [user]);
 
   const init = async (users) => {
-    let color;
+    let color, velocity = 3;
 
     for(let i = 0; i < users.length; i++) {
       let currentPos = userPosition(i)
       if (users[i] == socketRef.current.id) {
         color = "white";
-        player = new Snake(currentPos.x, currentPos.y, 10, color, 3, currentPos.dir);
+        player = new Snake(currentPos.x, currentPos.y, 10, color, velocity, currentPos.dir);
       }
       else {
         color = `hsl(${Math.random() * 360}, 50%, 50%)`;
-        enemies[users[i]] = new Snake(currentPos.x, currentPos.y, 10, color, 3, currentPos.dir);
+        enemies[users[i]] = new Snake(currentPos.x, currentPos.y, 10, color, velocity, currentPos.dir);
       }
     }
 
@@ -178,9 +185,8 @@ const PvpGameplay = () => {
     ctx.fillRect(0, 0, canvasWidth, fogTicks*5);
     ctx.fillRect(0, canvasHeight-fogTicks*5, canvasWidth, fogTicks*5);
   
-    if (player.direction != directionInput.direction) {
+    if (directionInput.direction && player.direction != directionInput.direction) {
       socketRef.current.emit("change direction", directionInput.direction);
-      player.setDirection(directionInput.direction);
     }
 
     player.update(ctx);
