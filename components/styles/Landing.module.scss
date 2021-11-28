@@ -21,7 +21,8 @@
 
       .title {
         position: absolute;
-        left: 20%;
+        left: 50%;
+        transform: translateX(-50%);
         top: -80%;
         animation: anim 1s forwards;
         animation-delay: 1s;
@@ -33,7 +34,8 @@
         text-align: center;
         position: absolute;
         bottom: 40%;
-        left: 30%;
+        left: 50%;
+        transform: translateX(-50%);
         opacity: 0;
         animation: anim2 1s forwards;
         animation-delay: 1.75s;
@@ -48,7 +50,8 @@
     .btns {
       position: absolute;
       bottom: 25%;
-      left: 25%;
+      left: 50%;
+      transform: translateX(-50%);
       opacity: 0;
       animation: anim3 1s forwards;
       animation-delay: 1.75s;

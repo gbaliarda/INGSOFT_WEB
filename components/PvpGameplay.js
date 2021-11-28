@@ -244,7 +244,7 @@ const PvpGameplay = () => {
         {!isAuthenticated ? 
           <button onClick={() => authenticate({signingMessage: "CryptoViper quiere acceder a tu MetaMask para iniciar sesión"})}>Iniciar Sesión</button>
         :
-          user.attributes.energy == 0 &&
+          user.attributes.energy <= 0 &&
             <button className={styles.disabled}>No dispones de energía para jugar</button>
         }
         { !lookingGame ?

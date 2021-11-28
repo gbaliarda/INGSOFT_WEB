@@ -10,11 +10,11 @@ export default function Navbar() {
 
   return (
     <nav className={styles.nav}>
-      <Link href="/">CryptoViper</Link>
+      <Link href="/"><a className={styles.logo}>CryptoViper</a></Link>
       <div className={styles.links}>
-        <Link href="/pve">PvE</Link>
         { isAuthenticated && 
           <div className={styles.userInfo}>
+            <Link href="/pve">PvE</Link>
             <Link href="/pvp">PvP</Link>
             <div className={styles.energyBox}>
               <span className={styles.energyText}>{`${user.attributes.energy}`}/20</span>
