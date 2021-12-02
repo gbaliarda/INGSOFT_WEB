@@ -12,10 +12,10 @@ import io from "socket.io-client";
 
 const canvasWidth = 1250;
 const canvasHeight = 600;
+const fpsInterval = 1000 / 60; // 60 fps
 
 const PvpGameplay = () => {
   const canvasRef = useRef();
-  const buttonRef = useRef();
   const [score, setScore] = useState(0);
   const [lookingGame, setLookingGame] = useState(false);
   const [gameOver, setGameover] = useState(true);
@@ -23,7 +23,7 @@ const PvpGameplay = () => {
   const { isAuthenticated, authenticate, user } = useMoralis();
   const socketRef = useRef();
 
-  let player, enemies = {}, animationId, particles, fogTicks = 0, ctx;
+  let player, enemies = {}, animationId, particles, fogTicks = 0, ctx, then, elapsed;
   const directionInput = new DirectionInput();
 
   useEffect(() => {
@@ -137,6 +137,8 @@ const PvpGameplay = () => {
     
     user.set("energy", user.attributes.energy-1);
     await user.save();
+
+    then = performance.now()
   }
 
   async function endGame() {
@@ -169,12 +171,22 @@ const PvpGameplay = () => {
     }
   }
 
-  async function animate() {
+  async function animate(timestamp) {
     if(Router.pathname != '/pvp') {
       setGameover(true);
       return;
     }
     animationId = requestAnimationFrame(animate);
+
+    if (!timestamp)
+      timestamp = then
+
+    elapsed = timestamp - then
+    if (elapsed <= fpsInterval)
+      return;
+
+    then = timestamp - (elapsed % fpsInterval)
+
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
