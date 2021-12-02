@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useMoralis } from "react-moralis";
 import Router from 'next/router'
 import Moralis from 'moralis';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StatusMessage from './StatusMessage';
 
 
@@ -35,6 +35,14 @@ export default function Landing() {
     }
     setLoadingStatus(false);
   };
+
+  useEffect(() => {
+    if(!isAuthenticated)
+      return;
+    Router.push('/account')
+
+
+  },[isAuthenticated]);
 
   return (
     <div className={styles.wrapper}>
