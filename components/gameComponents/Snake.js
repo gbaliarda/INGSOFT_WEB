@@ -29,11 +29,11 @@ export default class Snake {
   }
 
   grow() {
-    this.length += 5;
+    this.length += 3;
   }
 
   speedUp() {
-    this.velocity += 0.5;
+    this.velocity += 0.4;
   }
 
   draw(ctx) {

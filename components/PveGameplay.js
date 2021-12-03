@@ -63,8 +63,8 @@ const PveGameplay = () => {
     directionInput.init();
     particles = [];
     
-    user.set("energy", user.attributes.energy-1);
-    await user.save();
+    // user.set("energy", user.attributes.energy-1);
+    // await user.save();
     
     then = performance.now()
   }
