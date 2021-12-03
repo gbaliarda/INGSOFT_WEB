@@ -17,7 +17,6 @@ const fpsInterval = 1000 / 60; // limit 60 fps
 const PvpGameplay = () => {
   const canvasRef = useRef();
   const [score, setScore] = useState(0);
-  const [reward, setReward] = useState(0);
   const [pos, setPos] = useState(0);
   const [positions, setPositions] = useState([]);
   const [lookingGame, setLookingGame] = useState(false);
@@ -26,13 +25,13 @@ const PvpGameplay = () => {
   const { isAuthenticated, authenticate, user } = useMoralis();
   const socketRef = useRef();
 
-  let player, food, scoreAux, animationId, particles, fogTicks = 0, ctx, then, elapsed;
+  let player, interval, food, scoreAux, animationId, particles, fogTicks = 0, ctx, then, elapsed;
   const directionInput = new DirectionInput();
 
   useEffect(() => {
-    // socketRef.current = io.connect("https://cryptoviper.herokuapp.com");
+    socketRef.current = io.connect("https://cryptoviper.herokuapp.com");
     // socketRef.current = io.connect("https://cryv-ws.herokuapp.com/");
-    socketRef.current = io.connect("http://localhost:8000");
+    // socketRef.current = io.connect("http://localhost:8000");
   }, [])
 
   const lookForGame = () => {
@@ -63,11 +62,11 @@ const PvpGameplay = () => {
       fogTicks++;
     })
 
-    socketRef.current.on("update positions", async ({ player, position, score }) => {
-      const newPositions = [...positions, { player, position, score }]
+    socketRef.current.on("update positions", async ({ id, player, position, score }) => {
+      const newPositions = [{ id, player, position, score }, ...positions]
       setPositions(newPositions)
 
-      if (player == user.attributes.ethAddress) {
+      if (id == socketRef.current.id) {
         if (position == 1)
           user.set("ceAmount", user.attributes.ceAmount + 30);
         else if (position == 2)
@@ -100,7 +99,7 @@ const PvpGameplay = () => {
       return this;
     }
 
-  }, [user]);
+  }, [user, positions]);
 
   const init = async (users) => {
     let color, velocity = 3;
@@ -108,7 +107,7 @@ const PvpGameplay = () => {
     color = `hsl(${Math.random() * 360}, 50%, 50%)`;
 
     player = new Snake(canvasWidth / 2, canvasHeight / 2, 10, color, velocity, "right");
-    food = new Food("#ff0040", 6, canvasWidth, canvasHeight)
+    food = new Food("#ff0040", 6, fogTicks * 10, canvasWidth, fogTicks * 5, canvasHeight)
 
     directionInput.init();
     particles = [];
@@ -116,16 +115,18 @@ const PvpGameplay = () => {
     scoreAux = 0;
     setPositions([])
     setScore(0)
-    setReward(0)
     
     // user.set("energy", user.attributes.energy-1);
     // await user.save();
+
+    interval = setInterval(() => fogTicks++, 3000);
 
     then = performance.now()
   }
 
   async function endGame() {
     cancelAnimationFrame(animationId);
+    clearInterval(interval);
   }
 
   async function animate(timestamp) {
@@ -176,7 +177,7 @@ const PvpGameplay = () => {
             }
         ));
       }
-      food = new Food("#ff0040", 6, canvasWidth, canvasHeight);
+      food = new Food("#ff0040", 6, fogTicks * 10, canvasWidth, fogTicks * 5, canvasHeight);
       scoreAux += 100;
       setScore(scoreAux);
       player.grow();
@@ -203,7 +204,7 @@ const PvpGameplay = () => {
             }
         ));
       }
-      food = new Food("#ff0040", 6, canvasWidth, canvasHeight);
+      food = new Food("#ff0040", 6, fogTicks * 10, canvasWidth, fogTicks * 5, canvasHeight);
     }
   
     // particle animation
@@ -222,18 +223,31 @@ const PvpGameplay = () => {
       player.y - player.radius < fogTicks * 5 ||
       player.y + player.radius > canvasHeight - fogTicks * 5
     ) {
-      socketRef.current.emit("player lost", score);
+      socketRef.current.emit("player lost", scoreAux);
       endGame()
     }
   }
 
   return (
     <div className={styles.container}>
+       <p className={styles.score}>Puntuación: <span>{score}</span></p>
       <div className={styles.modal} style={{display: gameOver ? "flex" : "none"}}>
         {!lookingGame &&
-          <div>
-            <p className={styles.scoreModal} style={{display: score > 0 ? "block" : "none"}}>Terminaste en la posicion N°{pos}!</p>
-            <p className={styles.scoreModal} style={{display: score > 0 ? "block" : "none"}}>Recompensa: {pos == 1 ? 30 : (pos == 2 ? 10 : 0)} CE</p>
+          <div className={styles.leaderboard} style={{display: pos > 0 ? "block" : "none"}}>
+            <p className={styles.leaderboardTitle}>Tabla de clasificaciones</p>
+            <ol>
+              {positions.length < 4 && <li><p>??????????? ---- ????</p></li>}
+              {positions.length < 3 && <li><p>??????????? ---- ????</p></li>}
+              {positions.length < 2 && <li><p>??????????? ---- ????</p></li>}
+              {positions.map(position => {
+                return (
+                  <li key={position.id}>
+                    <p style={{color: position.position == pos ? "#d0db4e" : "#000"}}>{`${position.player.substring(0,5)}...${position.player.slice(-4)} ---- ${position.score}`}</p>
+                  </li>
+                )
+              })}
+            </ol>
+            <p className={styles.scoreModal}>Recompensa: {pos == 1 ? 30 : (pos == 2 ? 10 : 0)} CE</p>
           </div>
         }
         {!isAuthenticated ? 

@@ -46,3 +46,20 @@
   /* Para que no se seleccione el texto en azul */
   user-select: none;
 }
+
+
+.leaderboard {
+  .leaderboardTitle {
+    font-size: 1.3em;
+    margin-bottom: 1em;
+  }
+
+  ol {
+    margin-bottom: 1.3em;
+    
+    li {
+      font-size: 1.2em;
+      margin-bottom: .2em;
+    }
+  }
+}
