@@ -76,9 +76,8 @@ const PvpGameplay = () => {
         let currPlayer = results[i]
         newPositions.push({id: currPlayer.player.socket, player: currPlayer.player.user, position: i+1, score: currPlayer.score})
         if(currPlayer.player.socket == socketRef.current.id) {
-          if(i == 0 || 1) {
-            const ceWin = i == 0 ? 30 : 1;
-            user.set("ceAmount", user.attributes.ceAmount+ceWin);
+          if(i == 0) {
+            user.set("ceAmount", user.attributes.ceAmount+30);
             await user.save();
           }
           setPos(i+1)
@@ -125,8 +124,8 @@ const PvpGameplay = () => {
     setPositions([])
     setScore(0)
     
-    // user.set("energy", user.attributes.energy-1);
-    // await user.save();
+    user.set("energy", user.attributes.energy-1);
+    await user.save();
 
     interval = setInterval(() => fogTicks++, 3000);
 
@@ -266,7 +265,7 @@ const PvpGameplay = () => {
                 )
               })}
             </ol>
-            <p className={styles.scoreModal}>Recompensa: {pos == 1 ? 30 : (pos == 2 ? 10 : 0)} CE</p>
+            <p className={styles.scoreModal}>Recompensa: {pos == 1 ? 30 : 0} CE</p>
           </div>
         }
         {!isAuthenticated ? 
