@@ -30,9 +30,9 @@ const PvpGameplay = () => {
   const directionInput = new DirectionInput();
 
   useEffect(() => {
-    // socketRef.current = io.connect("https://cryptoviper.herokuapp.com");
+    socketRef.current = io.connect("https://cryptoviper.herokuapp.com");
     // socketRef.current = io.connect("https://cryv-ws.herokuapp.com/");
-    socketRef.current = io.connect("http://localhost:8000");
+    // socketRef.current = io.connect("http://localhost:8000");
     return () => {
       socketRef.current.emit("leaving pvp")
     }
