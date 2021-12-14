@@ -12,24 +12,30 @@ import io from "socket.io-client";
 
 const canvasWidth = 1250;
 const canvasHeight = 600;
-const fpsInterval = 1000 / 60; // 60 fps
+const fpsInterval = 1000 / 60; // limit 60 fps
 
 const PvpGameplay = () => {
   const canvasRef = useRef();
   const [score, setScore] = useState(0);
+  const [pos, setPos] = useState(0);
+  const [positions, setPositions] = useState([]);
   const [lookingGame, setLookingGame] = useState(false);
   const [gameOver, setGameover] = useState(true);
   const [playerAmount, setPlayerAmount] = useState(0);
+  const [waitingForResults, setWaitingForResults] = useState(false);
   const { isAuthenticated, authenticate, user } = useMoralis();
   const socketRef = useRef();
 
-  let player, enemies = {}, animationId, particles, fogTicks = 0, ctx, then, elapsed;
+  let player, interval, food, scoreAux, animationId, particles, fogTicks = 0, ctx, then, elapsed;
   const directionInput = new DirectionInput();
 
   useEffect(() => {
-    // socketRef.current = io.connect("https://cryptoviper.herokuapp.com");
-    socketRef.current = io.connect("https://cryv-ws.herokuapp.com/");
+    socketRef.current = io.connect("https://cryptoviper.herokuapp.com");
+    // socketRef.current = io.connect("https://cryv-ws.herokuapp.com/");
     // socketRef.current = io.connect("http://localhost:8000");
+    return () => {
+      socketRef.current.emit("leaving pvp")
+    }
   }, [])
 
   const lookForGame = () => {
@@ -56,42 +62,29 @@ const PvpGameplay = () => {
       setPlayerAmount(playerAmount)
     })
 
-    socketRef.current.on("update direction", ({id, direction}) => {
-      console.log(id)
-      console.log(socketRef.current.id)
-      if (id == socketRef.current.id)
-        player.setDirection(direction)
-      else
-        enemies[id].setDirection(direction)
+    socketRef.current.on("user left", (playerAmount) => {
+      setPlayerAmount(playerAmount)
     })
 
     socketRef.current.on("fog tick", () => {
       fogTicks++;
     })
 
-    socketRef.current.on("player died", (id) => {
-      enemies[id].cells.forEach(cell => {
-        for (let i = 0; i < enemies[id].radius; i++) {
-          particles.push(
-            new Particle(
-              cell.x, 
-              cell.y, 
-              Math.random() * 2,
-              enemies[id].color,
-              { 
-                x: (Math.random() - 0.5) * (Math.random() * 5), 
-                y: (Math.random() - 0.5) * (Math.random() * 5),
-              }
-          ));
+    socketRef.current.on("results finish", async (results) => {
+      const newPositions = []
+      for(let i = 0; i < results.length; i++) {
+        let currPlayer = results[i]
+        newPositions.push({id: currPlayer.player.socket, player: currPlayer.player.user, position: i+1, score: currPlayer.score})
+        if(currPlayer.player.socket == socketRef.current.id) {
+          if(i == 0) {
+            user.set("ceAmount", user.attributes.ceAmount+30);
+            await user.save();
+          }
+          setPos(i+1)
         }
-      })
-      delete enemies[id]
-    
-      if(Object.keys(enemies).length == 0) {
-        socketRef.current.emit("game over")
-        endGame()
-        console.log("Ganaste!");
       }
+      setPositions(newPositions)
+      setWaitingForResults(false)
     })
 
     // GAME
@@ -119,56 +112,31 @@ const PvpGameplay = () => {
   const init = async (users) => {
     let color, velocity = 3;
 
-    for(let i = 0; i < users.length; i++) {
-      let currentPos = userPosition(i)
-      if (users[i] == socketRef.current.id) {
-        color = "white";
-        player = new Snake(currentPos.x, currentPos.y, 10, color, velocity, currentPos.dir);
-      }
-      else {
-        color = `hsl(${Math.random() * 360}, 50%, 50%)`;
-        enemies[users[i]] = new Snake(currentPos.x, currentPos.y, 10, color, velocity, currentPos.dir);
-      }
-    }
+    color = `hsl(${Math.random() * 360}, 50%, 50%)`;
+
+    player = new Snake(canvasWidth / 2, canvasHeight / 2, 10, color, velocity, "right");
+    food = new Food("#ff0040", 6, fogTicks * 10, canvasWidth, fogTicks * 5, canvasHeight)
 
     directionInput.init();
     particles = [];
     fogTicks = 0;
+    scoreAux = 0;
+    setPositions([])
+    setScore(0)
     
     user.set("energy", user.attributes.energy-1);
     await user.save();
+
+    interval = setInterval(() => fogTicks++, 3000);
 
     then = performance.now()
   }
 
   async function endGame() {
+    setWaitingForResults(true)
+    setGameover(true)
     cancelAnimationFrame(animationId);
-    setGameover(true);
-    setScore(Object.keys(enemies).length + 1)
-
-    if (Object.keys(enemies).length == 0)
-      user.set("ceAmount", user.attributes.ceAmount + 30);
-    else if (Object.keys(enemies).length == 1)
-      user.set("ceAmount", user.attributes.ceAmount + 10);
-
-    await user.save();
-  }
-
-  const userPosition = (pos) => {
-    switch(pos) {
-      case 0:
-        return {x: 10, y: canvasHeight/2, dir: "right"} // left
-        break;
-      case 1:
-        return {x: canvasWidth/2, y: 10, dir:"down"} // top
-        break;
-      case 2:
-        return {x: canvasWidth-10, y: canvasHeight/2, dir: "left"} //w
-        break;
-      case 3:
-        return {x: canvasWidth/2,  y: canvasHeight-10, dir: "up"}
-        break;
-    }
+    clearInterval(interval);
   }
 
   async function animate(timestamp) {
@@ -196,32 +164,58 @@ const PvpGameplay = () => {
     ctx.fillRect(canvasWidth-fogTicks*10, 0, fogTicks*10, canvasHeight);
     ctx.fillRect(0, 0, canvasWidth, fogTicks*5);
     ctx.fillRect(0, canvasHeight-fogTicks*5, canvasWidth, fogTicks*5);
-  
-    if (directionInput.direction && player.direction != directionInput.direction) {
-      socketRef.current.emit("change direction", directionInput.direction);
-    }
 
+    player.setDirection(directionInput.direction);
     player.update(ctx);
 
-    Object.entries(enemies).forEach(([id, enemy]) => {
-      enemy.update(ctx);
-      
-      // colision player - enemies o enemy - enemy
-      enemy.cells.every(cell => {
-        const dist = Math.hypot(player.x - cell.x, player.y - cell.y) - enemy.radius - player.radius;
-        if (dist < 1) {
+    food.draw(ctx);
 
-          // gana por desempate por ID
-          if (cell.x == enemy.x && cell.y == enemy.y && socketRef.current.id.localeCompare(id) < 0)
-            return false
+    const dist = Math.hypot(player.x - food.x, player.y - food.y) - food.radius - player.radius;
+  
+    // colision snake - food
+    if (dist < 1) {
+      for (let i = 0; i < food.radius * 3; i++) {
+        particles.push(
+          new Particle(
+            food.x, 
+            food.y, 
+            Math.random() * 2, 
+            food.color,
+            { 
+              x: (Math.random() - 0.5) * (Math.random() * 5), 
+              y: (Math.random() - 0.5) * (Math.random() * 5),
+            }
+        ));
+      }
+      food = new Food("#ff0040", 6, fogTicks * 10, canvasWidth, fogTicks * 5, canvasHeight);
+      scoreAux += 100;
+      setScore(scoreAux);
+      player.grow();
+      player.speedUp();
+    }
 
-          socketRef.current.emit("players collision");
-          endGame()
-          return false
-        }
-        return true
-      })
-    })
+    // food lost on fog
+    if (
+      food.x - food.radius < fogTicks * 10 || 
+      food.x + food.radius > canvasWidth - fogTicks * 10 ||
+      food.y - food.radius < fogTicks * 5 ||
+      food.y + food.radius > canvasHeight - fogTicks * 5
+    ) {
+      for (let i = 0; i < food.radius * 3; i++) {
+        particles.push(
+          new Particle(
+            food.x, 
+            food.y, 
+            Math.random() * 2, 
+            food.color,
+            { 
+              x: (Math.random() - 0.5) * (Math.random() * 5), 
+              y: (Math.random() - 0.5) * (Math.random() * 5),
+            }
+        ));
+      }
+      food = new Food("#ff0040", 6, fogTicks * 10, canvasWidth, fogTicks * 5, canvasHeight);
+    }
   
     // particle animation
     particles.forEach((particle, index) => {
@@ -239,18 +233,39 @@ const PvpGameplay = () => {
       player.y - player.radius < fogTicks * 5 ||
       player.y + player.radius > canvasHeight - fogTicks * 5
     ) {
-      socketRef.current.emit("players collision");
+      socketRef.current.emit("player lost", scoreAux);
       endGame()
     }
   }
 
   return (
     <div className={styles.container}>
+       <p className={styles.score}>Puntuación: <span>{score}</span></p>
       <div className={styles.modal} style={{display: gameOver ? "flex" : "none"}}>
-        {!lookingGame &&
+        { waitingForResults && 
           <div>
-            <p className={styles.scoreModal} style={{display: score > 0 ? "block" : "none"}}>Terminaste en la posicion N°{score}!</p>
-            <p className={styles.scoreModal} style={{display: score > 0 ? "block" : "none"}}>Recompensa: {score == 1 ? 30 : (score == 2 ? 10 : 0)} CE</p>
+            <p className={styles.waitingResults}>Esperando resultados</p>
+            <div className={styles.spinnerContainer}>
+              <Spinner color="#033557"/>
+            </div>
+          </div>
+        }
+        {!lookingGame && !waitingForResults && 
+          <div className={styles.leaderboard} style={{display: pos > 0 ? "block" : "none"}}>
+            <p className={styles.leaderboardTitle}>Tabla de clasificaciones</p>
+            <ol>
+              {/* {positions.length < 4 && <li><p>??????????? ---- ????</p></li>} */}
+              {/* {positions.length < 3 && <li><p>??????????? ---- ????</p></li>} */}
+              {positions.length < 2 && <li><p>??????????? ---- ????</p></li>}
+              {positions.map(position => {
+                return (
+                  <li key={position.id}>
+                    <p style={{color: position.position == pos ? "#d0db4e" : "#000"}}>{`${position.player.substring(0,5)}...${position.player.slice(-4)} ---- ${position.score}`}</p>
+                  </li>
+                )
+              })}
+            </ol>
+            <p className={styles.scoreModal}>Recompensa: {pos == 1 ? 30 : 0} CE</p>
           </div>
         }
         {!isAuthenticated ? 
@@ -260,14 +275,16 @@ const PvpGameplay = () => {
             <button className={styles.disabled}>No dispones de energía para jugar</button>
         }
         { !lookingGame ?
-        <button style={{display: isAuthenticated && user.attributes.energy > 0 ? "block" : "none"}} onClick={lookForGame}>Buscar partida</button>
+          !waitingForResults &&
+            <button style={{display: isAuthenticated && user.attributes.energy > 0 ? "block" : "none"}} onClick={lookForGame}>Buscar partida</button>
+          
         : 
         <div>
           <p className={styles.scoreModal} style={{marginBottom: "0"}}>Buscando partida...</p>
           <div style={{height: "50px"}}>
             <Spinner color="#033557" />
           </div>
-          <p className={styles.scoreModal} style={{marginBottom: "0", marginTop: "10px"}}>Jugadores encontrados {playerAmount}/4</p>
+          <p className={styles.scoreModal} style={{marginBottom: "0", marginTop: "10px"}}>Jugadores encontrados {playerAmount}/2</p>
         </div>}
       </div>
       <canvas className={styles.canvas} ref={canvasRef}></canvas>

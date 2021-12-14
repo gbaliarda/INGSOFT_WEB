@@ -1,10 +1,10 @@
 export default class Food {
 
-  constructor(color, radius, maxX, maxY) {
+  constructor(color, radius, minX, maxX, minY, maxY) {
     this.color = color;
     this.radius = radius;
-    this.x = this.getRandomPosition(0 + this.radius, maxX - this.radius);
-    this.y = this.getRandomPosition(0 + this.radius, maxY - this.radius);
+    this.x = this.getRandomPosition(minX + this.radius, maxX - this.radius);
+    this.y = this.getRandomPosition(minY + this.radius, maxY - this.radius);
   }
 
   getRandomPosition(min, max) {
