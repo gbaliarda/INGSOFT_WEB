@@ -58,13 +58,13 @@ const PveGameplay = () => {
     const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
 
     player = new Snake(canvasWidth / 2, canvasHeight / 2, 15, color, 4, "right");
-    food = new Food("#ff0040", 8, canvasWidth, canvasHeight)
+    food = new Food("#ff0040", 8, 0, canvasWidth, 0, canvasHeight)
     
     directionInput.init();
     particles = [];
     
-    // user.set("energy", user.attributes.energy-1);
-    // await user.save();
+    user.set("energy", user.attributes.energy-1);
+    await user.save();
     
     then = performance.now()
   }
@@ -111,7 +111,7 @@ const PveGameplay = () => {
             }
         ));
       }
-      food = new Food("#ff0040", 8, canvasWidth, canvasHeight);
+      food = new Food("#ff0040", 8, 0, canvasWidth, 0, canvasHeight);
       scoreAux += 100;
       setScore(scoreAux);
       player.grow();
