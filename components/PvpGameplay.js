@@ -22,6 +22,7 @@ const PvpGameplay = () => {
   const [lookingGame, setLookingGame] = useState(false);
   const [gameOver, setGameover] = useState(true);
   const [playerAmount, setPlayerAmount] = useState(0);
+  const [waitingForResults, setWaitingForResults] = useState(false);
   const { isAuthenticated, authenticate, user } = useMoralis();
   const socketRef = useRef();
 
@@ -29,9 +30,12 @@ const PvpGameplay = () => {
   const directionInput = new DirectionInput();
 
   useEffect(() => {
-    socketRef.current = io.connect("https://cryptoviper.herokuapp.com");
+    // socketRef.current = io.connect("https://cryptoviper.herokuapp.com");
     // socketRef.current = io.connect("https://cryv-ws.herokuapp.com/");
-    // socketRef.current = io.connect("http://localhost:8000");
+    socketRef.current = io.connect("http://localhost:8000");
+    return () => {
+      socketRef.current.emit("leaving pvp")
+    }
   }, [])
 
   const lookForGame = () => {
@@ -58,25 +62,30 @@ const PvpGameplay = () => {
       setPlayerAmount(playerAmount)
     })
 
+    socketRef.current.on("user left", (playerAmount) => {
+      setPlayerAmount(playerAmount)
+    })
+
     socketRef.current.on("fog tick", () => {
       fogTicks++;
     })
 
-    socketRef.current.on("update positions", async ({ id, player, position, score }) => {
-      const newPositions = [{ id, player, position, score }, ...positions]
-      setPositions(newPositions)
-
-      if (id == socketRef.current.id) {
-        if (position == 1)
-          user.set("ceAmount", user.attributes.ceAmount + 30);
-        else if (position == 2)
-          user.set("ceAmount", user.attributes.ceAmount + 10);
-
-        setPos(position)
-        setGameover(true)
-        await user.save();
+    socketRef.current.on("results finish", async (results) => {
+      const newPositions = []
+      for(let i = 0; i < results.length; i++) {
+        let currPlayer = results[i]
+        newPositions.push({id: currPlayer.player.socket, player: currPlayer.player.user, position: i+1, score: currPlayer.score})
+        if(currPlayer.player.socket == socketRef.current.id) {
+          if(i == 0 || 1) {
+            const ceWin = i == 0 ? 30 : 1;
+            user.set("ceAmount", user.attributes.ceAmount+ceWin);
+            await user.save();
+          }
+          setPos(i+1)
+        }
       }
-  
+      setPositions(newPositions)
+      setWaitingForResults(false)
     })
 
     // GAME
@@ -99,7 +108,7 @@ const PvpGameplay = () => {
       return this;
     }
 
-  }, [user, positions]);
+  }, [user]);
 
   const init = async (users) => {
     let color, velocity = 3;
@@ -125,6 +134,8 @@ const PvpGameplay = () => {
   }
 
   async function endGame() {
+    setWaitingForResults(true)
+    setGameover(true)
     cancelAnimationFrame(animationId);
     clearInterval(interval);
   }
@@ -232,12 +243,20 @@ const PvpGameplay = () => {
     <div className={styles.container}>
        <p className={styles.score}>Puntuación: <span>{score}</span></p>
       <div className={styles.modal} style={{display: gameOver ? "flex" : "none"}}>
-        {!lookingGame &&
+        { waitingForResults && 
+          <div>
+            <p className={styles.waitingResults}>Esperando resultados</p>
+            <div className={styles.spinnerContainer}>
+              <Spinner color="#033557"/>
+            </div>
+          </div>
+        }
+        {!lookingGame && !waitingForResults && 
           <div className={styles.leaderboard} style={{display: pos > 0 ? "block" : "none"}}>
             <p className={styles.leaderboardTitle}>Tabla de clasificaciones</p>
             <ol>
-              {positions.length < 4 && <li><p>??????????? ---- ????</p></li>}
-              {positions.length < 3 && <li><p>??????????? ---- ????</p></li>}
+              {/* {positions.length < 4 && <li><p>??????????? ---- ????</p></li>} */}
+              {/* {positions.length < 3 && <li><p>??????????? ---- ????</p></li>} */}
               {positions.length < 2 && <li><p>??????????? ---- ????</p></li>}
               {positions.map(position => {
                 return (
@@ -257,14 +276,16 @@ const PvpGameplay = () => {
             <button className={styles.disabled}>No dispones de energía para jugar</button>
         }
         { !lookingGame ?
-        <button style={{display: isAuthenticated && user.attributes.energy > 0 ? "block" : "none"}} onClick={lookForGame}>Buscar partida</button>
+          !waitingForResults &&
+            <button style={{display: isAuthenticated && user.attributes.energy > 0 ? "block" : "none"}} onClick={lookForGame}>Buscar partida</button>
+          
         : 
         <div>
           <p className={styles.scoreModal} style={{marginBottom: "0"}}>Buscando partida...</p>
           <div style={{height: "50px"}}>
             <Spinner color="#033557" />
           </div>
-          <p className={styles.scoreModal} style={{marginBottom: "0", marginTop: "10px"}}>Jugadores encontrados {playerAmount}/4</p>
+          <p className={styles.scoreModal} style={{marginBottom: "0", marginTop: "10px"}}>Jugadores encontrados {playerAmount}/2</p>
         </div>}
       </div>
       <canvas className={styles.canvas} ref={canvasRef}></canvas>
