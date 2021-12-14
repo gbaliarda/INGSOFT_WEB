@@ -98,7 +98,7 @@ export default function Account() {
       cryvWanted: cryvToExchange,
     }
     try {
-      const result = await fetch("http://localhost:8080/claim", {
+      const result = await fetch("/api/claim", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json; charset=utf-8'
@@ -115,7 +115,7 @@ export default function Account() {
       await user.save();
       if(!accountIsMounted)
         return;
-      setStatus({ message: `${ceToExchange}CE intercambiados con exito por ${cryvToExchange}CRYV`, error: false})
+      setStatus({ message: `${ceToExchange}CE intercambiados con éxito por ${cryvToExchange}CRYV`, error: false})
       toggleExchangePopup();
     } catch (e) {
       console.log(e);

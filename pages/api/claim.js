@@ -30,7 +30,7 @@ async function sendTokens(recipient, amount) {
   }
 }
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
   
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST'])
