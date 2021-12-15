@@ -59,7 +59,7 @@ export default function Landing() {
                   <span className={styles.pveText}>PvE</span>
                 </div>
               </Link>
-              <a href="/WhitePaper.pdf" target="_blank" rel="noreferrer">
+              <a href="https://gbaliarda.gitbook.io/cryptoviper-whitepaper/" target="_blank" rel="noreferrer">
                 <div className={styles.continueBtn}>
                   <span className={styles.continueText}>WhitePaper</span>
                 </div>
@@ -76,7 +76,7 @@ export default function Landing() {
                 <span className={styles.pveText}>PvE</span>
               </div>
               <div className={styles.continueBtn}>
-                <a href="/WhitePaper.pdf" target="_blank" rel="noreferrer">
+                <a href="https://gbaliarda.gitbook.io/cryptoviper-whitepaper/" target="_blank" rel="noreferrer">
                   <span className={styles.continueText}>WhitePaper</span>
                 </a>
               </div>
