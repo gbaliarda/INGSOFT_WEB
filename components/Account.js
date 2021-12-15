@@ -112,6 +112,7 @@ export default function Account() {
       user.set("ceAmount", parseInt(user.attributes.ceAmount-ceToExchange));
       if(user == null)
         return;
+      setCeBalance(ceBalance-ceToExchange)
       await user.save();
       if(!accountIsMounted)
         return;
