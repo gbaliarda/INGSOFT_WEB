@@ -23,7 +23,10 @@ export default function Landing() {
           case 'PvE':
             Router.push('/pve');
             break;
-            default:  
+		  case 'PvP':
+			Router.push('/pvp');
+			break;
+          default:  
             Router.push('/account');
             break;
         }
